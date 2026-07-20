@@ -301,13 +301,15 @@ enum Nemotron35Language: String, CaseIterable, Codable, Sendable {
 enum MeetingLiveCaptionBackend: String, CaseIterable, Codable, Sendable {
     case parakeetRealtimeEOU = "parakeet_realtime_eou"
     case nemotron35 = "nemotron35"
+    case whisperPortuguese = "whisper_portuguese"
 
-    static let defaultBackend: Self = .parakeetRealtimeEOU
+    static let defaultBackend: Self = .whisperPortuguese
 
     var label: String {
         switch self {
         case .parakeetRealtimeEOU: return MeetingLiveCaptionModelStore.label
         case .nemotron35: return BackendOption.nemotron35Multilingual.label
+        case .whisperPortuguese: return "Whisper Large Turbo PT-BR"
         }
     }
 
@@ -315,6 +317,7 @@ enum MeetingLiveCaptionBackend: String, CaseIterable, Codable, Sendable {
         switch self {
         case .parakeetRealtimeEOU: return "\(label) (live preview only)"
         case .nemotron35: return "\(label) (live + final)"
+        case .whisperPortuguese: return "\(label) (live preview only)"
         }
     }
 
@@ -324,6 +327,8 @@ enum MeetingLiveCaptionBackend: String, CaseIterable, Codable, Sendable {
         case .nemotron35:
             guard #available(macOS 15, *) else { return false }
             return BackendOption.nemotron35Multilingual.isDownloaded
+        case .whisperPortuguese:
+            return WhisperKitTranscriber.isModelDownloaded(WhisperKitTranscriber.portugueseLargeTurboModel)
         }
     }
 
@@ -1087,7 +1092,7 @@ struct AppConfig: Codable {
     var enableDictationOCRContext: Bool = false
     var useCoreAudioTap: Bool = true
     /// Enables the explicitly selected live meeting transcription mode.
-    var enableLiveStreamingPartials: Bool = false
+    var enableLiveStreamingPartials: Bool = true
     var meetingLiveCaptionBackend: String = MeetingLiveCaptionBackend.defaultBackend.rawValue
     /// Reveals a compact live transcript beside the meeting waveform while the
     /// pointer is over either floating surface.

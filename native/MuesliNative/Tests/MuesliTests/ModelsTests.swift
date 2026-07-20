@@ -599,8 +599,8 @@ struct AppConfigTests {
         #expect(config.customTranscriptCleanupPrompts.isEmpty)
         #expect(config.enableScreenContext == false)
         #expect(config.enableDictationOCRContext == false)
-        #expect(config.enableLiveStreamingPartials == false)
-        #expect(config.resolvedMeetingLiveCaptionBackend == .parakeetRealtimeEOU)
+        #expect(config.enableLiveStreamingPartials == true)
+        #expect(config.resolvedMeetingLiveCaptionBackend == .whisperPortuguese)
         #expect(config.showMeetingTranscriptOnIndicatorHover == true)
         #expect(config.dictationHotkey == .default)
         #expect(config.computerUseHotkey == .computerUseDefault)
@@ -1047,8 +1047,8 @@ struct AppConfigTests {
         #expect(config.customTranscriptCleanupPrompts.isEmpty)
         #expect(config.enableScreenContext == false)
         #expect(config.enableDictationOCRContext == false)
-        #expect(config.enableLiveStreamingPartials == false)
-        #expect(config.resolvedMeetingLiveCaptionBackend == .parakeetRealtimeEOU)
+        #expect(config.enableLiveStreamingPartials == true)
+        #expect(config.resolvedMeetingLiveCaptionBackend == .whisperPortuguese)
         #expect(config.showMeetingTranscriptOnIndicatorHover == true)
     }
 

@@ -144,6 +144,9 @@ struct SettingsView: View {
         if usesUnifiedMeetingTranscript {
             return "Nemotron transcribes continuously and becomes the final raw transcript."
         }
+        if selected == .whisperPortuguese {
+            return "Whisper Large Turbo previews Portuguese as it is spoken; the final model transcribes separately."
+        }
         return "Parakeet provides a low-latency preview; the final model transcribes separately."
     }
 

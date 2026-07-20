@@ -4,6 +4,9 @@ import MuesliCore
 
 /// Native Swift transcription backend using WhisperKit (CoreML on ANE/GPU).
 actor WhisperKitTranscriber {
+    static let portugueseLanguageCode = "pt"
+    static let portugueseLargeTurboModel = "large-v3-v20240930_626MB"
+
     private var whisperKit: WhisperKit?
     private var loadedModel: String?
 
@@ -92,12 +95,41 @@ actor WhisperKitTranscriber {
         guard let whisperKit else { throw TranscriberError.notLoaded }
 
         let start = CFAbsoluteTimeGetCurrent()
-        let results = try await whisperKit.transcribe(audioPath: wavURL.path)
+        let results = try await whisperKit.transcribe(
+            audioPath: wavURL.path,
+            decodeOptions: Self.portugueseDecodingOptions()
+        )
         let elapsed = CFAbsoluteTimeGetCurrent() - start
 
-        let text = results.map(\.text).joined(separator: " ")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let text = Self.text(from: results)
         return (text: text, processingTime: elapsed)
+    }
+
+    /// Transcribe a 16 kHz mono PCM chunk for the live meeting preview.
+    func transcribe(samples: [Float]) async throws -> String {
+        guard let whisperKit else { throw TranscriberError.notLoaded }
+        let results = try await whisperKit.transcribe(
+            audioArray: samples,
+            decodeOptions: Self.portugueseDecodingOptions()
+        )
+        return Self.text(from: results)
+    }
+
+    /// The fork is intentionally Portuguese-first: do not auto-detect and do
+    /// not let Whisper use its English translation task.
+    static func portugueseDecodingOptions() -> DecodingOptions {
+        DecodingOptions(
+            task: .transcribe,
+            language: portugueseLanguageCode,
+            temperature: 0,
+            usePrefillPrompt: true,
+            detectLanguage: false
+        )
+    }
+
+    private static func text(from results: [TranscriptionResult]) -> String {
+        results.map(\.text).joined(separator: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /// Run a short silent transcription to trigger CoreML compilation.
@@ -106,7 +138,10 @@ actor WhisperKitTranscriber {
         guard let whisperKit else { return }
         let silence = [Float](repeating: 0, count: 16000) // 1 second of silence at 16kHz
         let start = CFAbsoluteTimeGetCurrent()
-        let _: [TranscriptionResult] = try await whisperKit.transcribe(audioArray: silence)
+        let _: [TranscriptionResult] = try await whisperKit.transcribe(
+            audioArray: silence,
+            decodeOptions: Self.portugueseDecodingOptions()
+        )
         let elapsed = CFAbsoluteTimeGetCurrent() - start
         fputs("[whisperkit] warmup transcription took \(String(format: "%.1f", elapsed))s\n", stderr)
     }

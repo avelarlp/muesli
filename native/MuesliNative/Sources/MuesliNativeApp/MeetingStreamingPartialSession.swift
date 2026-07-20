@@ -88,6 +88,13 @@ enum MeetingLiveCaptionModelStore {
                 await transcriber.shutdown()
                 throw error
             }
+        case .whisperPortuguese:
+            let transcriber = WhisperKitTranscriber()
+            try await transcriber.loadModel(modelName: WhisperKitTranscriber.portugueseLargeTurboModel)
+            return (
+                mic: WhisperPortugueseMeetingPartialEngine(transcriber: transcriber, label: "You"),
+                system: WhisperPortugueseMeetingPartialEngine(transcriber: transcriber, label: "Others")
+            )
         }
     }
 }
@@ -212,6 +219,61 @@ private actor Nemotron35MeetingPartialEngine: MeetingStreamingPartialEngine {
         streamState = nil
         partialHandler = nil
         fputs("[meeting-partials] \(label) Nemotron 3.5 session stopped\n", stderr)
+    }
+}
+
+/// Whisper is not an RNNT model, so this engine transcribes short completed
+/// windows while keeping the model warm. It is deliberately a preview layer:
+/// the normal meeting transcription remains the durable final result.
+private actor WhisperPortugueseMeetingPartialEngine: MeetingStreamingPartialEngine {
+    private static let chunkSamples = 48_000 // 3 seconds at 16 kHz
+
+    private let transcriber: WhisperKitTranscriber
+    private let label: String
+    private var sampleBuffer: [Float] = []
+    private var transcript = ""
+    private var partialHandler: (@Sendable (String) -> Void)?
+
+    init(transcriber: WhisperKitTranscriber, label: String) {
+        self.transcriber = transcriber
+        self.label = label
+    }
+
+    func setPartialHandler(_ handler: @escaping @Sendable (String) -> Void) async {
+        partialHandler = handler
+    }
+
+    func process(samples: [Float]) async throws {
+        guard !samples.isEmpty else { return }
+        sampleBuffer.append(contentsOf: samples)
+        while sampleBuffer.count >= Self.chunkSamples {
+            let chunk = Array(sampleBuffer.prefix(Self.chunkSamples))
+            sampleBuffer.removeFirst(Self.chunkSamples)
+            try await appendTranscript(for: chunk)
+        }
+    }
+
+    func finish() async throws {
+        guard !sampleBuffer.isEmpty else { return }
+        let tail = sampleBuffer
+        sampleBuffer.removeAll(keepingCapacity: true)
+        try await appendTranscript(for: tail)
+    }
+
+    func shutdown() async {
+        sampleBuffer.removeAll(keepingCapacity: false)
+        transcript = ""
+        partialHandler = nil
+        fputs("[meeting-partials] \(label) Whisper PT-BR session stopped\\n", stderr)
+    }
+
+    private func appendTranscript(for samples: [Float]) async throws {
+        let text = try await transcriber.transcribe(samples: samples)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        if !transcript.isEmpty { transcript += " " }
+        transcript += text
+        partialHandler?(transcript)
     }
 }
 

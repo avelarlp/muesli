@@ -6,6 +6,15 @@ import MuesliCore
 @Suite("WhisperKitTranscriber")
 struct WhisperKitTranscriberTests {
 
+    @Test("Portuguese Whisper options force transcription instead of translation")
+    func portugueseWhisperOptions() {
+        let options = WhisperKitTranscriber.portugueseDecodingOptions()
+        #expect(options.language == "pt")
+        #expect(options.task == .transcribe)
+        #expect(options.usePrefillPrompt)
+        #expect(!options.detectLanguage)
+    }
+
     @Test("whisper models use whisper backend")
     func whisperModelsBackend() {
         let whisperOptions = BackendOption.all.filter { $0.backend == "whisper" }
