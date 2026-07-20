@@ -323,7 +323,7 @@ struct OnboardingView: View {
     @ViewBuilder
     private func onboardingButton(_ title: String, enabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(.white)
                 .padding(.horizontal, MuesliTheme.spacing20)
@@ -399,11 +399,11 @@ struct OnboardingView: View {
             }
 
             VStack(alignment: .leading, spacing: 1) {
-                Text(modelDownloadIndicatorTitle)
+                Text(LocalizedStringKey(modelDownloadIndicatorTitle))
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundStyle(modelDownloadError == nil ? MuesliTheme.textSecondary : MuesliTheme.recording)
                     .lineLimit(1)
-                Text(modelDownloadIndicatorDetail(progress: progress))
+                Text(LocalizedStringKey(modelDownloadIndicatorDetail(progress: progress)))
                     .font(.system(size: 10, weight: .medium, design: .rounded))
                     .foregroundStyle(MuesliTheme.textTertiary)
                     .lineLimit(1)
@@ -510,7 +510,7 @@ struct OnboardingView: View {
                     .font(MuesliTheme.caption())
                     .foregroundStyle(MuesliTheme.textTertiary)
 
-                OnboardingTextField(text: $userName, placeholder: "Enter your name", onSubmit: {
+                OnboardingTextField(text: $userName, placeholder: NSLocalizedString("Enter your name", comment: "Onboarding name placeholder"), onSubmit: {
                     if !userName.trimmingCharacters(in: .whitespaces).isEmpty {
                         goToNextStep()
                     }
@@ -584,9 +584,9 @@ struct OnboardingView: View {
             VStack(spacing: 5) {
                 Image(systemName: icon)
                     .font(.system(size: 20, weight: .medium))
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 12, weight: .semibold))
-                Text(subtitle)
+                Text(LocalizedStringKey(subtitle))
                     .font(.system(size: 10))
                     .foregroundStyle(selected ? .white.opacity(0.72) : MuesliTheme.textTertiary)
                     .lineLimit(1)
@@ -710,7 +710,7 @@ struct OnboardingView: View {
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 6) {
-                        Text(option.label)
+                        Text(LocalizedStringKey(option.label))
                             .font(MuesliTheme.headline())
                             .foregroundStyle(MuesliTheme.textPrimary)
                         if option.recommended {
@@ -726,7 +726,7 @@ struct OnboardingView: View {
                             .font(MuesliTheme.caption())
                             .foregroundStyle(MuesliTheme.textTertiary)
                     }
-                    Text(option.description)
+                    Text(LocalizedStringKey(option.description))
                         .font(MuesliTheme.caption())
                         .foregroundStyle(MuesliTheme.textSecondary)
                 }
@@ -797,16 +797,20 @@ struct OnboardingView: View {
                 let isConfirmingGrant = recentlyGrantedPermissionName == step.name
 
                 VStack(spacing: MuesliTheme.spacing8) {
-                    Text("Permission \(displayIndex + 1) of \(total)")
+                    Text(String(
+                        format: NSLocalizedString("Permission %d of %d", comment: "Onboarding permission progress"),
+                        displayIndex + 1,
+                        total
+                    ))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(MuesliTheme.textTertiary)
                         .textCase(.uppercase)
 
-                    Text(step.name)
+                    Text(LocalizedStringKey(step.name))
                         .font(MuesliTheme.title1())
                         .foregroundStyle(MuesliTheme.textPrimary)
 
-                    Text(step.description)
+                    Text(LocalizedStringKey(step.description))
                         .font(MuesliTheme.body())
                         .foregroundStyle(MuesliTheme.textSecondary)
                         .multilineTextAlignment(.center)
@@ -833,7 +837,7 @@ struct OnboardingView: View {
                             Image(systemName: "checkmark")
                                 .font(.system(size: 12, weight: .bold))
                         }
-                        Text(permissionButtonTitle(for: step.name, isConfirmingGrant: isConfirmingGrant))
+                        Text(LocalizedStringKey(permissionButtonTitle(for: step.name, isConfirmingGrant: isConfirmingGrant)))
                             .font(.system(size: 14, weight: .semibold))
                     }
                     .foregroundStyle(.white)

@@ -572,7 +572,7 @@ struct SettingsView: View {
 
                 HStack(spacing: MuesliTheme.spacing12) {
                     VStack(alignment: .leading, spacing: MuesliTheme.spacing4) {
-                        Text(syncStatusText)
+                        Text(LocalizedStringKey(syncStatusText))
                             .font(MuesliTheme.body())
                             .foregroundStyle(MuesliTheme.textPrimary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -582,7 +582,7 @@ struct SettingsView: View {
                                 .foregroundStyle(MuesliTheme.textTertiary)
                         }
                         if let linkedDeviceText = syncLinkedDeviceText {
-                            Text(linkedDeviceText)
+                        Text(LocalizedStringKey(linkedDeviceText))
                                 .font(MuesliTheme.caption())
                                 .foregroundStyle(MuesliTheme.textTertiary)
                                 .fixedSize(horizontal: false, vertical: true)
@@ -643,9 +643,16 @@ struct SettingsView: View {
         guard appState.config.iCloudSyncEnabled else { return nil }
         if let remoteDeviceName = appState.iCloudBridgeCompanionDeviceName {
             if let platform = appState.iCloudBridgeRemoteDevicePlatform {
-                return "Linked \(syncDeviceLabel(for: platform)): \(remoteDeviceName)"
+                return String(
+                    format: NSLocalizedString("Linked %@: %@", comment: "Linked iCloud companion device"),
+                    syncDeviceLabel(for: platform),
+                    remoteDeviceName
+                )
             }
-            return "Linked device: \(remoteDeviceName)"
+            return String(
+                format: NSLocalizedString("Linked device: %@", comment: "Linked iCloud companion device"),
+                remoteDeviceName
+            )
         }
         return "No linked iPhone yet."
     }

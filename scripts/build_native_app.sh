@@ -204,6 +204,12 @@ cat > "$STAGED_APP_DIR/Contents/Info.plist" <<PLIST
   <string>APPL</string>
   <key>CFBundleIconFile</key>
   <string>muesli.icns</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>pt-BR</string>
+  <key>CFBundleLocalizations</key>
+  <array>
+    <string>pt-BR</string>
+  </array>
   <key>MuesliSupportDirectoryName</key>
   <string>$APP_SUPPORT_DIR_NAME</string>
   <key>MuesliTelemetryDeckAppID</key>
