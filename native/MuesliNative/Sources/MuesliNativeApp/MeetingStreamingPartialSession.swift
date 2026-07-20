@@ -227,6 +227,26 @@ private actor Nemotron35MeetingPartialEngine: MeetingStreamingPartialEngine {
 /// the normal meeting transcription remains the durable final result.
 private actor WhisperPortugueseMeetingPartialEngine: MeetingStreamingPartialEngine {
     private static let chunkSamples = 48_000 // 3 seconds at 16 kHz
+    private static let frameSamples = 320 // 20 ms at 16 kHz
+    private static let minimumSpeechFrames = 5
+    private static let minimumActiveFrameRatio: Float = 0.035
+    private static let minimumGlobalRMS: Float = 0.0035
+    private static let minimumGlobalPeak: Float = 0.025
+    private static let frameRMSGate: Float = 0.008
+    private static let framePeakGate: Float = 0.035
+    private static let weakAudioRMS: Float = 0.006
+    private static let weakAudioPeak: Float = 0.04
+    private static let shortSilenceHallucinations: Set<String> = [
+        "e ai",
+        "e ai e ai",
+        "obrigado",
+        "obrigada",
+        "valeu",
+        "oi",
+        "ola",
+        "ta",
+        "tchau",
+    ]
 
     private let transcriber: WhisperKitTranscriber
     private let label: String
@@ -268,12 +288,93 @@ private actor WhisperPortugueseMeetingPartialEngine: MeetingStreamingPartialEngi
     }
 
     private func appendTranscript(for samples: [Float]) async throws {
+        let activity = Self.audioActivity(in: samples)
+        guard activity.hasSpeech else {
+            fputs("[meeting-partials] \(label) skipped quiet Whisper PT-BR window rms=\(String(format: "%.5f", activity.rms)) peak=\(String(format: "%.5f", activity.peak)) active=\(activity.activeFrames)/\(activity.totalFrames)\n", stderr)
+            return
+        }
         let text = try await transcriber.transcribe(samples: samples)
             .trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
+        guard !Self.isLikelySilenceHallucination(text, activity: activity) else {
+            fputs("[meeting-partials] \(label) dropped likely Whisper silence hallucination: \(text)\n", stderr)
+            return
+        }
         if !transcript.isEmpty { transcript += " " }
         transcript += text
         partialHandler?(transcript)
+    }
+
+    private struct AudioActivity {
+        let rms: Float
+        let peak: Float
+        let activeFrames: Int
+        let totalFrames: Int
+
+        var activeRatio: Float {
+            guard totalFrames > 0 else { return 0 }
+            return Float(activeFrames) / Float(totalFrames)
+        }
+
+        var hasSpeech: Bool {
+            rms >= WhisperPortugueseMeetingPartialEngine.minimumGlobalRMS
+                && peak >= WhisperPortugueseMeetingPartialEngine.minimumGlobalPeak
+                && activeFrames >= WhisperPortugueseMeetingPartialEngine.minimumSpeechFrames
+                && activeRatio >= WhisperPortugueseMeetingPartialEngine.minimumActiveFrameRatio
+        }
+
+        var isWeakAudio: Bool {
+            rms < WhisperPortugueseMeetingPartialEngine.weakAudioRMS
+                || peak < WhisperPortugueseMeetingPartialEngine.weakAudioPeak
+        }
+    }
+
+    private static func audioActivity(in samples: [Float]) -> AudioActivity {
+        guard !samples.isEmpty else {
+            return AudioActivity(rms: 0, peak: 0, activeFrames: 0, totalFrames: 0)
+        }
+
+        var totalSquares: Float = 0
+        var globalPeak: Float = 0
+        var activeFrames = 0
+        var totalFrames = 0
+
+        var index = 0
+        while index < samples.count {
+            let end = min(index + frameSamples, samples.count)
+            var frameSquares: Float = 0
+            var framePeak: Float = 0
+
+            for sample in samples[index..<end] {
+                let value = abs(sample)
+                frameSquares += value * value
+                framePeak = max(framePeak, value)
+            }
+
+            let count = Float(end - index)
+            let frameRMS = sqrt(frameSquares / max(count, 1))
+            if frameRMS >= frameRMSGate || framePeak >= framePeakGate {
+                activeFrames += 1
+            }
+
+            totalSquares += frameSquares
+            globalPeak = max(globalPeak, framePeak)
+            totalFrames += 1
+            index = end
+        }
+
+        let rms = sqrt(totalSquares / Float(samples.count))
+        return AudioActivity(rms: rms, peak: globalPeak, activeFrames: activeFrames, totalFrames: totalFrames)
+    }
+
+    private static func isLikelySilenceHallucination(_ text: String, activity: AudioActivity) -> Bool {
+        guard activity.isWeakAudio else { return false }
+        let normalized = text
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "pt_BR"))
+            .replacingOccurrences(of: #"[^a-z0-9\s]"#, with: " ", options: .regularExpression)
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return shortSilenceHallucinations.contains(normalized)
     }
 }
 
