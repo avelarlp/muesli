@@ -179,6 +179,9 @@ fi
 if [[ -d "$ROOT/assets/audio" ]]; then
   ditto "$ROOT/assets/audio" "$STAGED_APP_DIR/Contents/Resources/audio"
 fi
+if [[ -d "$ROOT/assets/pt-BR.lproj" ]]; then
+  ditto "$ROOT/assets/pt-BR.lproj" "$STAGED_APP_DIR/Contents/Resources/pt-BR.lproj"
+fi
 
 cat > "$STAGED_APP_DIR/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>

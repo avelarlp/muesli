@@ -17,8 +17,8 @@ private enum ManualNotesSaveStatus {
 
     var label: String {
         switch self {
-        case .saved: return "Saved"
-        case .saving: return "Saving..."
+        case .saved: return "Salvo"
+        case .saving: return "Salvando..."
         }
     }
 }
@@ -84,7 +84,7 @@ struct MeetingDetailView: View {
         controller: MuesliController,
         appState: AppState,
         onBack: (() -> Void)? = nil,
-        backLabel: String = "Back to Meetings"
+        backLabel: String = "Voltar para reuniões"
     ) {
         self.meeting = meeting
         self.controller = controller
@@ -133,10 +133,10 @@ struct MeetingDetailView: View {
                 }
             } else {
                 VStack(spacing: MuesliTheme.spacing12) {
-                    Text("No meeting selected")
+                    Text("Nenhuma reunião selecionada")
                         .font(MuesliTheme.title3())
                         .foregroundStyle(MuesliTheme.textSecondary)
-                    Text("Choose a meeting from the Meetings browser to open it here.")
+                    Text("Escolha uma reunião no navegador de Reuniões para abri-la aqui.")
                         .font(MuesliTheme.callout())
                         .foregroundStyle(MuesliTheme.textTertiary)
                 }
@@ -144,39 +144,39 @@ struct MeetingDetailView: View {
                 .background(MuesliTheme.backgroundBase)
             }
         }
-        .alert("Couldn't Save Summary", isPresented: summaryErrorBinding) {
+        .alert("Não foi possível salvar o resumo", isPresented: summaryErrorBinding) {
             Button("OK", role: .cancel) {
                 summaryErrorMessage = nil
             }
         } message: {
-            Text(summaryErrorMessage ?? "The updated meeting notes could not be saved.")
+            Text(summaryErrorMessage ?? "Não foi possível salvar as notas atualizadas da reunião.")
         }
-        .alert("Couldn't Re-transcribe Meeting", isPresented: retranscriptionErrorBinding) {
+        .alert("Não foi possível retranscrever a reunião", isPresented: retranscriptionErrorBinding) {
             Button("OK", role: .cancel) {
                 retranscriptionErrorMessage = nil
             }
         } message: {
-            Text(retranscriptionErrorMessage ?? "The saved recording could not be re-transcribed.")
+            Text(retranscriptionErrorMessage ?? "Não foi possível retranscrever a gravação salva.")
         }
-        .alert("Re-summarize Notes?", isPresented: transcriptResummaryPromptBinding) {
-            Button("Re-summarize") {
+        .alert("Resumir novamente as notas?", isPresented: transcriptResummaryPromptBinding) {
+            Button("Resumir novamente") {
                 resummarizeAfterTranscriptEdit()
             }
-            Button("Not Now", role: .cancel) {
+            Button("Agora não", role: .cancel) {
                 transcriptResummaryPromptMeetingID = nil
             }
         } message: {
-            Text("Your transcript edits may change the generated notes. Re-summarize now to update them from the edited transcript.")
+            Text("Suas edições na transcrição podem alterar as notas geradas. Resuma novamente para atualizá-las a partir da transcrição editada.")
         }
-        .alert("Delete Meeting", isPresented: $showDeleteConfirmation) {
-            Button("Delete", role: .destructive) {
+        .alert("Excluir reunião", isPresented: $showDeleteConfirmation) {
+            Button("Excluir", role: .destructive) {
                 if let meeting {
                     controller.deleteMeeting(id: meeting.id)
                 }
             }
-            Button("Cancel", role: .cancel) {}
+            Button("Cancelar", role: .cancel) {}
         } message: {
-            Text("Are you sure you want to delete this meeting? Saved notes, transcript, and any retained recording will be removed.")
+            Text("Tem certeza de que deseja excluir esta reunião? Notas, transcrição e qualquer gravação mantida serão removidas.")
         }
     }
 
@@ -410,8 +410,8 @@ struct MeetingDetailView: View {
 
     private var documentModePicker: some View {
         Picker("", selection: $documentMode) {
-            Text("Notes").tag(MeetingDocumentMode.notes)
-            Text("Transcript").tag(MeetingDocumentMode.transcript)
+            Text("Notas").tag(MeetingDocumentMode.notes)
+            Text("Transcrição").tag(MeetingDocumentMode.transcript)
         }
         .pickerStyle(.segmented)
         .tint(MuesliTheme.accent)
@@ -421,8 +421,8 @@ struct MeetingDetailView: View {
 
     private var recordingModePicker: some View {
         Picker("", selection: $recordingMode) {
-            Text("Notes").tag(RecordingContentMode.notes)
-            Text("Live").tag(RecordingContentMode.live)
+            Text("Notas").tag(RecordingContentMode.notes)
+            Text("Ao vivo").tag(RecordingContentMode.live)
         }
         .pickerStyle(.segmented)
         .tint(MuesliTheme.accent)
@@ -481,7 +481,7 @@ struct MeetingDetailView: View {
             HStack(spacing: 6) {
                 ProgressView()
                     .controlSize(.small)
-                Text("Summarizing...")
+                Text("Resumindo...")
                     .font(.system(size: 11))
                     .foregroundStyle(MuesliTheme.textTertiary)
             }
@@ -560,13 +560,13 @@ struct MeetingDetailView: View {
                 HStack(spacing: 6) {
                     ProgressView()
                         .controlSize(.small)
-                    Text("Re-transcribing...")
+                    Text("Retranscrevendo...")
                         .font(.system(size: 11))
                         .foregroundStyle(MuesliTheme.textTertiary)
                 }
                 .padding(.horizontal, MuesliTheme.spacing8)
             } else {
-                iconButton("arrow.clockwise", label: "Re-transcribe") {
+                iconButton("arrow.clockwise", label: "Retranscrever") {
                     startRetranscription(for: meeting)
                 }
                 .disabled(meeting.status == .recording || meeting.status == .processing || isEditingNotes || isEditingTranscript)
@@ -602,7 +602,7 @@ struct MeetingDetailView: View {
                 )
             }
 
-            Section("Built-in Templates") {
+            Section("Modelos integrados") {
                 ForEach(controller.builtInMeetingTemplates()) { template in
                     Button {
                         pendingTemplateID = template.id
@@ -617,7 +617,7 @@ struct MeetingDetailView: View {
             }
 
             if !controller.customMeetingTemplates().isEmpty {
-                Section("Custom Templates") {
+                Section("Modelos personalizados") {
                     ForEach(controller.customMeetingTemplates()) { template in
                         Button {
                             pendingTemplateID = template.id
@@ -635,7 +635,7 @@ struct MeetingDetailView: View {
 
             Divider()
 
-            Button("Manage Templates…") {
+            Button("Gerenciar modelos…") {
                 controller.showMeetingTemplatesManager()
             }
         } label: {
@@ -731,7 +731,7 @@ struct MeetingDetailView: View {
             Circle()
                 .fill(color)
                 .frame(width: 7, height: 7)
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(MuesliTheme.textSecondary)
         }
@@ -838,7 +838,7 @@ struct MeetingDetailView: View {
     @ViewBuilder
     private func exportMenu(for meeting: MeetingRecord) -> some View {
         let currentContent: MeetingExportContent = documentMode == .transcript ? .transcript : .notes
-        let currentLabel = documentMode == .transcript ? "Export Transcript" : "Export Notes"
+        let currentLabel = documentMode == .transcript ? "Exportar transcrição" : "Exportar notas"
         Menu {
             Button {
                 MeetingExporter.export(meeting: meeting, content: currentContent)
@@ -848,13 +848,13 @@ struct MeetingDetailView: View {
             Button {
                 MeetingExporter.export(meeting: meeting, content: .fullMeeting)
             } label: {
-                Label("Export Full Meeting", systemImage: "doc.on.doc")
+                Label("Exportar reunião completa", systemImage: "doc.on.doc")
             }
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: "square.and.arrow.up")
                     .font(.system(size: 10, weight: .semibold))
-                Text("Export")
+                Text("Exportar")
                     .font(.system(size: 12, weight: .semibold))
             }
             .foregroundStyle(MuesliTheme.textPrimary)
@@ -882,7 +882,7 @@ struct MeetingDetailView: View {
                     Button {
                         controller.revealMeetingRecordingInFinder(path: savedRecordingPath)
                     } label: {
-                        Label("Show Recording", systemImage: "folder")
+                        Label("Mostrar gravação", systemImage: "folder")
                     }
                 }
 
@@ -893,7 +893,7 @@ struct MeetingDetailView: View {
                     Button(role: .destructive) {
                         showDeleteConfirmation = true
                     } label: {
-                        Label("Delete Meeting", systemImage: "trash")
+                        Label("Excluir reunião", systemImage: "trash")
                     }
                 }
             } label: {
@@ -912,7 +912,7 @@ struct MeetingDetailView: View {
             }
             .menuStyle(.borderlessButton)
             .fixedSize()
-            .help("More actions")
+            .help("Mais ações")
         }
     }
 
@@ -920,7 +920,7 @@ struct MeetingDetailView: View {
         HStack(spacing: 8) {
             Image(systemName: isSelected ? "checkmark" : systemImage)
                 .frame(width: 12)
-            Text(title)
+            Text(LocalizedStringKey(title))
         }
     }
 
@@ -930,7 +930,7 @@ struct MeetingDetailView: View {
             HStack(spacing: 4) {
                 Image(systemName: systemImage)
                     .font(.system(size: 10))
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(.system(size: 11, weight: .medium))
                     .lineLimit(1)
                     .fixedSize(horizontal: true, vertical: false)
@@ -950,7 +950,7 @@ struct MeetingDetailView: View {
     }
 
     private var deleteButton: some View {
-        iconButton("trash", label: "Delete") {
+        iconButton("trash", label: "Excluir") {
             showDeleteConfirmation = true
         }
     }
@@ -960,8 +960,8 @@ struct MeetingDetailView: View {
             ProgressView()
                 .controlSize(.small)
                 .frame(width: 14, height: 14)
-                .accessibilityLabel("Preparing transcription")
-            Text(appState.meetingStartStatus ?? "Meeting transcription will start shortly.")
+                .accessibilityLabel("Preparando transcrição")
+            Text(appState.meetingStartStatus ?? "A transcrição da reunião começará em breve.")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(MuesliTheme.textSecondary)
                 .lineLimit(1)
@@ -977,10 +977,10 @@ struct MeetingDetailView: View {
     }
 
     private var cancelMeetingPreparationButton: some View {
-        iconButton("xmark", label: "Cancel") {
+        iconButton("xmark", label: "Cancelar") {
             controller.cancelMeetingPreparation()
         }
-        .help("Cancel meeting preparation")
+        .help("Cancelar preparação da reunião")
     }
 
     private var pauseResumeRecordingButton: some View {
@@ -991,7 +991,7 @@ struct MeetingDetailView: View {
             HStack(spacing: 6) {
                 Image(systemName: isPaused ? "play.fill" : "pause.fill")
                     .font(.system(size: 10, weight: .semibold))
-                Text(isPaused ? "Resume" : "Pause")
+                Text(isPaused ? "Retomar" : "Pausar")
                     .font(.system(size: 12, weight: .semibold))
             }
             .foregroundStyle(isPaused ? MuesliTheme.backgroundBase : MuesliTheme.textPrimary)
@@ -1006,7 +1006,7 @@ struct MeetingDetailView: View {
         }
         .buttonStyle(.plain)
         .disabled(!appState.isMeetingRecording)
-        .help(isPaused ? "Resume recording" : "Pause recording")
+        .help(isPaused ? "Retomar gravação" : "Pausar gravação")
     }
 
     /// Shown on a finished meeting when no recording is active. A split control:
@@ -1023,7 +1023,7 @@ struct MeetingDetailView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "record.circle")
                         .font(.system(size: 10, weight: .semibold))
-                    Text("Resume")
+                    Text("Retomar")
                         .font(.system(size: 12, weight: .semibold))
                 }
                 .foregroundStyle(MuesliTheme.backgroundBase)
@@ -1032,18 +1032,18 @@ struct MeetingDetailView: View {
                 .background(MuesliTheme.accent)
             }
             .buttonStyle(.plain)
-            .help("Resume recording")
+            .help("Retomar gravação")
 
             Menu {
                 Button {
                     controller.resumeFinishedMeeting(meetingID: meeting.id)
                 } label: {
-                    Label("Resume recording", systemImage: "record.circle")
+                    Label("Retomar gravação", systemImage: "record.circle")
                 }
                 Button {
                     controller.startFollowUpMeeting(fromMeetingID: meeting.id)
                 } label: {
-                    Label("Start a follow-up", systemImage: "arrow.turn.down.right")
+                    Label("Iniciar acompanhamento", systemImage: "arrow.turn.down.right")
                 }
             } label: {
                 Image(systemName: "chevron.down")
@@ -1056,7 +1056,7 @@ struct MeetingDetailView: View {
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
             .fixedSize(horizontal: true, vertical: false)
-            .help("Resume recording, or start a follow-up meeting")
+            .help("Retome a gravação ou inicie uma reunião de acompanhamento")
         }
         .fixedSize()
         .clipShape(RoundedRectangle(cornerRadius: MuesliTheme.cornerSmall))
@@ -1076,7 +1076,7 @@ struct MeetingDetailView: View {
             HStack(spacing: 6) {
                 Image(systemName: "stop.fill")
                     .font(.system(size: 10, weight: .semibold))
-                Text("Stop")
+                Text("Encerrar")
                     .font(.system(size: 12, weight: .semibold))
             }
             .foregroundStyle(.white)
@@ -1087,11 +1087,11 @@ struct MeetingDetailView: View {
         }
         .buttonStyle(.plain)
         .disabled(!appState.isMeetingRecording)
-        .help("Stop recording")
+        .help("Encerrar gravação")
     }
 
     private var discardRecordingButton: some View {
-        iconButton("xmark", label: "Discard") {
+        iconButton("xmark", label: "Descartar") {
             controller.discardMeetingWithConfirmation()
         }
     }
@@ -1242,7 +1242,7 @@ struct MeetingDetailView: View {
                 Image(systemName: icon)
                     .font(.system(size: 11))
                     .frame(width: 16)
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(MuesliTheme.callout())
                 Spacer()
                 if isActive {

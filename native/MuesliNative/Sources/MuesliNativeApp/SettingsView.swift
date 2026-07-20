@@ -406,7 +406,7 @@ struct SettingsView: View {
         let width = rowControlWidth ?? controlWidth
         HStack(alignment: .top, spacing: 20) {
             VStack(alignment: .leading, spacing: 6) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(MuesliTheme.body())
                     .foregroundStyle(MuesliTheme.textPrimary)
                 Text(screenContextDescription(includesScreenOCR: includesScreenOCR))
@@ -2157,7 +2157,7 @@ struct SettingsView: View {
     @ViewBuilder
     private func settingsSection(_ title: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing8) {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(MuesliTheme.textTertiary)
                 .textCase(.uppercase)
@@ -2182,7 +2182,7 @@ struct SettingsView: View {
     private func settingsRow(_ label: String, controlWidth rowControlWidth: CGFloat? = nil, @ViewBuilder control: () -> some View) -> some View {
         let width = rowControlWidth ?? controlWidth
         HStack(alignment: .center) {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(MuesliTheme.body())
                 .foregroundStyle(MuesliTheme.textPrimary)
                 .layoutPriority(1)
@@ -2207,10 +2207,10 @@ struct SettingsView: View {
         let width = rowControlWidth ?? controlWidth
         HStack(alignment: .center, spacing: 20) {
             VStack(alignment: .leading, spacing: 4) {
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(MuesliTheme.body())
                     .foregroundStyle(MuesliTheme.textPrimary)
-                Text(description)
+                Text(LocalizedStringKey(description))
                     .font(MuesliTheme.caption())
                     .foregroundStyle(MuesliTheme.textTertiary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -2226,7 +2226,7 @@ struct SettingsView: View {
     }
 
     private func settingsDescription(_ text: String) -> some View {
-        Text(text)
+        Text(LocalizedStringKey(text))
             .font(MuesliTheme.caption())
             .foregroundStyle(MuesliTheme.textTertiary)
             .padding(.horizontal, MuesliTheme.spacing16)
@@ -2289,7 +2289,7 @@ struct SettingsView: View {
                     Image(systemName: systemImage)
                         .font(.system(size: 11, weight: .semibold))
                 }
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .lineLimit(1)
             }
             .font(.system(size: 12, weight: .medium))
@@ -2912,7 +2912,7 @@ struct SettingsView: View {
         let isDestructive = role == .destructive
         Button(action: action) {
             HStack(spacing: MuesliTheme.spacing8) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                 if let systemImage {
                     Image(systemName: systemImage)
                         .font(.system(size: 13, weight: .semibold))

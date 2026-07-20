@@ -4,7 +4,7 @@ import MuesliCore
 enum SyncOriginDisplay {
     static let iOSSource = "ios"
     static let iOSBadgeLabel = "iOS"
-    static let iOSBadgeHelp = "Synced from Muesli for iOS"
+    static let iOSBadgeHelp = "Sincronizado do Muesli para iOS"
 
     static func badgeLabel(forDictationSource source: String) -> String? {
         source.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() == iOSSource
@@ -20,9 +20,9 @@ enum SyncOriginDisplay {
 extension RecordOriginFilter {
     var label: String {
         switch self {
-        case .all: return "All"
-        case .thisMac: return "This Mac"
-        case .fromIPhone: return "From iPhone"
+        case .all: return "Todas"
+        case .thisMac: return "Este Mac"
+        case .fromIPhone: return "Do iPhone"
         }
     }
 }
@@ -31,7 +31,7 @@ struct RecordOriginPicker: View {
     @Binding var selection: RecordOriginFilter
 
     var body: some View {
-        Picker("Record source", selection: $selection) {
+        Picker("Origem do registro", selection: $selection) {
             ForEach(RecordOriginFilter.allCases, id: \.self) { origin in
                 Text(origin.label).tag(origin)
             }
@@ -39,8 +39,8 @@ struct RecordOriginPicker: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .frame(width: 240)
-        .help("Filter by the device where the recording was created")
-        .accessibilityLabel("Record source")
+        .help("Filtre pelo dispositivo em que a gravação foi criada")
+        .accessibilityLabel("Origem do registro")
     }
 }
 

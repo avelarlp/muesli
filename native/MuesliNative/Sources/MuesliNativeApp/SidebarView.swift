@@ -379,7 +379,7 @@ struct SidebarView: View {
                 .frame(width: sidebarIconColumnWidth, height: sidebarIconColumnWidth)
 
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
                         .foregroundStyle(MuesliTheme.textSecondary)
                         .lineLimit(1)
@@ -450,7 +450,7 @@ struct SidebarView: View {
             HStack(spacing: MuesliTheme.spacing12) {
                 socialLogo(imageName: imageName, fallbackIcon: fallbackIcon)
                     .frame(width: sidebarIconColumnWidth, height: sidebarIconColumnWidth, alignment: .center)
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(MuesliTheme.callout())
                     .foregroundStyle(MuesliTheme.textSecondary)
                     .lineLimit(1)
@@ -496,7 +496,7 @@ struct SidebarView: View {
                     .foregroundStyle(isSelected ? MuesliTheme.accent : MuesliTheme.textSecondary)
                     .frame(width: sidebarIconColumnWidth, height: sidebarIconColumnWidth, alignment: .center)
                     .offset(y: icon == "square.and.arrow.down" ? -1 : 0)
-                Text(label)
+                Text(LocalizedStringKey(label))
                     .font(MuesliTheme.headline())
                     .foregroundStyle(isSelected ? MuesliTheme.textPrimary : MuesliTheme.textSecondary)
                 Spacer()
@@ -593,7 +593,7 @@ struct SidebarView: View {
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(isSelected ? MuesliTheme.accent : MuesliTheme.textTertiary)
                 .frame(width: sidebarIconColumnWidth)
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(MuesliTheme.callout())
                 .foregroundStyle(isSelected ? MuesliTheme.textPrimary : MuesliTheme.textSecondary)
                 .lineLimit(1)

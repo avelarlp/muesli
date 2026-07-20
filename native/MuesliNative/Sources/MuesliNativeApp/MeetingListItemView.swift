@@ -124,11 +124,11 @@ struct MeetingListItemView: View {
         .contentShape(Rectangle())
         .onTapGesture(perform: onSelect)
         .onHover { isHovering = $0 }
-        .alert("Delete Meeting", isPresented: $showDeleteConfirmation) {
-            Button("Delete", role: .destructive) { onDelete?() }
-            Button("Cancel", role: .cancel) {}
+        .alert("Excluir reunião", isPresented: $showDeleteConfirmation) {
+            Button("Excluir", role: .destructive) { onDelete?() }
+            Button("Cancelar", role: .cancel) {}
         } message: {
-            Text("Are you sure you want to delete this meeting? Saved notes, transcript, and any retained recording will be removed.")
+            Text("Tem certeza de que deseja excluir esta reunião? Notas, transcrição e qualquer gravação mantida serão removidas.")
         }
     }
 
@@ -141,13 +141,13 @@ struct MeetingListItemView: View {
                 if record.followUpToID != nil {
                     relationshipIcon(
                         "arrow.turn.down.right",
-                        help: "Follow-up meeting"
+                        help: "Reunião de acompanhamento"
                     )
                 }
                 if hasFollowUps {
                     relationshipIcon(
                         "arrow.triangle.branch",
-                        help: "Has follow-up meetings"
+                        help: "Possui reuniões de acompanhamento"
                     )
                 }
             }
@@ -190,10 +190,10 @@ struct MeetingListItemView: View {
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .help("Move to folder")
+        .help("Mover para a pasta")
         .popover(isPresented: $showFolderPopover, arrowEdge: .leading) {
             VStack(alignment: .leading, spacing: 0) {
-                folderPopoverRow(icon: "tray", label: "Unfiled", isActive: record.folderID == nil) {
+                folderPopoverRow(icon: "tray", label: "Sem pasta", isActive: record.folderID == nil) {
                     onMove(nil)
                     showFolderPopover = false
                 }
@@ -211,7 +211,7 @@ struct MeetingListItemView: View {
                 }
                 if onCreateFolderAndMove != nil {
                     Divider().padding(.vertical, 4)
-                    folderPopoverRow(icon: "folder.badge.plus", label: "New Folder...") {
+                    folderPopoverRow(icon: "folder.badge.plus", label: "Nova pasta...") {
                         showFolderPopover = false
                         newFolderName = ""
                         showNewFolderPrompt = true
@@ -220,17 +220,17 @@ struct MeetingListItemView: View {
             }
             .padding(8)
         }
-        .alert("New Folder", isPresented: $showNewFolderPrompt) {
-            TextField("Folder name", text: $newFolderName)
-            Button("Create") {
+        .alert("Nova pasta", isPresented: $showNewFolderPrompt) {
+            TextField("Nome da pasta", text: $newFolderName)
+            Button("Criar") {
                 let trimmed = newFolderName.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !trimmed.isEmpty {
                     onCreateFolderAndMove?(trimmed)
                 }
             }
-            Button("Cancel", role: .cancel) {}
+            Button("Cancelar", role: .cancel) {}
         } message: {
-            Text("Create a new folder and move this meeting into it.")
+            Text("Crie uma nova pasta e mova esta reunião para ela.")
         }
     }
 
@@ -274,7 +274,7 @@ struct MeetingListItemView: View {
         }
         .buttonStyle(.plain)
         .opacity(isHovering ? 1 : 0)
-        .help("Delete meeting")
+        .help("Excluir reunião")
     }
 
     // MARK: - Formatting
@@ -294,10 +294,10 @@ struct MeetingListItemView: View {
             return AnyView(SyncOriginBadge(label: label))
         }
         if isImportedAudio {
-            return AnyView(sourceBadge(icon: "square.and.arrow.down", label: "Imported", help: "Imported audio"))
+            return AnyView(sourceBadge(icon: "square.and.arrow.down", label: "Importado", help: "Áudio importado"))
         }
         if hasSavedRecording {
-            return AnyView(sourceBadge(icon: "waveform", label: "Recording", help: "Saved recording available"))
+            return AnyView(sourceBadge(icon: "waveform", label: "Gravação", help: "Gravação salva disponível"))
         }
         return nil
     }

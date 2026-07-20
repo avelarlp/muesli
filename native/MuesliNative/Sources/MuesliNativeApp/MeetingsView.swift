@@ -6,12 +6,12 @@ enum MeetingBrowserFilter: Hashable {
 
     var label: String {
         switch self {
-        case .all: return "All time"
-        case .last2Days: return "Last 2 days"
-        case .lastWeek: return "Last week"
-        case .last2Weeks: return "Last 2 weeks"
-        case .lastMonth: return "Last month"
-        case .last3Months: return "Last 3 months"
+        case .all: return "Todo o período"
+        case .last2Days: return "Últimos 2 dias"
+        case .lastWeek: return "Última semana"
+        case .last2Weeks: return "Últimas 2 semanas"
+        case .lastMonth: return "Último mês"
+        case .last3Months: return "Últimos 3 meses"
         }
     }
 }
@@ -22,8 +22,8 @@ enum MeetingBrowserSort: Hashable {
 
     var label: String {
         switch self {
-        case .newestFirst: return "Newest first"
-        case .oldestFirst: return "Oldest first"
+        case .newestFirst: return "Mais recentes primeiro"
+        case .oldestFirst: return "Mais antigas primeiro"
         }
     }
 }
@@ -209,8 +209,8 @@ struct MeetingsView: View {
     }
 
     private var currentFolderName: String {
-        guard let folderID = appState.selectedFolderID else { return "All Meetings" }
-        return appState.folders.first(where: { $0.id == folderID })?.name ?? "All Meetings"
+        guard let folderID = appState.selectedFolderID else { return "Todas as reuniões" }
+        return appState.folders.first(where: { $0.id == folderID })?.name ?? "Todas as reuniões"
     }
 
     private var currentDocumentMeeting: MeetingRecord? {
@@ -371,9 +371,9 @@ struct MeetingsView: View {
             let isTomorrow = calendar.date(byAdding: .day, value: 1, to: today).map { calendar.isDate(date, inSameDayAs: $0) } ?? false
             let dayLabel: String
             if isToday {
-                dayLabel = "Today"
+                dayLabel = "Hoje"
             } else if isTomorrow {
-                dayLabel = "Tomorrow"
+                dayLabel = "Amanhã"
             } else {
                 dayLabel = monthFormatter.string(from: date)
             }
@@ -395,7 +395,7 @@ struct MeetingsView: View {
     private var comingUpSection: some View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing16) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Coming Up")
+                Text("Próximas")
                     .font(.custom("Cormorant Garamond", size: 22).weight(.medium))
                     .foregroundStyle(MuesliTheme.textPrimary)
 
@@ -408,7 +408,7 @@ struct MeetingsView: View {
                         HStack(spacing: 4) {
                             Image(systemName: "arrow.triangle.2.circlepath")
                                 .font(.system(size: 9))
-                            Text("Add Google to macOS Calendar for real-time sync")
+                            Text("Adicione o Google ao Calendário do macOS para sincronização em tempo real")
                                 .font(.system(size: 11))
                         }
                         .foregroundStyle(MuesliTheme.accent)
@@ -466,7 +466,7 @@ struct MeetingsView: View {
                                         HStack(spacing: 4) {
                                             Image(systemName: "video.fill")
                                                 .font(.system(size: 9))
-                                            Text("Join & Record")
+                                            Text("Entrar e gravar")
                                                 .font(.system(size: 10, weight: .medium))
                                         }
                                         .foregroundStyle(.white)
@@ -479,7 +479,7 @@ struct MeetingsView: View {
                                 }
 
                                 Menu {
-                                    Button("All Meetings") {
+                                    Button("Todas as reuniões") {
                                         controller.createMeetingFromCalendarEvent(event, folderID: nil)
                                     }
                                     Divider()
@@ -489,7 +489,7 @@ struct MeetingsView: View {
                                         }
                                     }
                                 } label: {
-                                    Text("Add to folder")
+                                    Text("Adicionar à pasta")
                                         .font(.system(size: 10, weight: .medium))
                                         .foregroundStyle(MuesliTheme.textSecondary)
                                         .padding(.horizontal, 8)
@@ -546,7 +546,7 @@ struct MeetingsView: View {
                 .frame(width: 20, height: 20)
         }
         .buttonStyle(.plain)
-        .help("Hide from Coming Up")
+        .help("Ocultar das próximas")
     }
 
     @ViewBuilder
@@ -588,7 +588,7 @@ struct MeetingsView: View {
     @ViewBuilder
     private func browserHeaderMeta(meetingCount: Int) -> some View {
         HStack(spacing: MuesliTheme.spacing8) {
-            Text("\(meetingCount) meeting\(meetingCount == 1 ? "" : "s")")
+            Text("\(meetingCount) reuni\(meetingCount == 1 ? "ão" : "ões")")
                 .font(MuesliTheme.callout())
                 .foregroundStyle(MuesliTheme.textSecondary)
                 .fixedSize()
@@ -598,7 +598,7 @@ struct MeetingsView: View {
                 .foregroundStyle(MuesliTheme.textTertiary)
                 .fixedSize()
 
-            Text("Open a meeting to review notes, transcript, and template-driven summaries")
+            Text("Abra uma reunião para revisar notas, transcrição e resumos guiados por modelo")
                 .font(MuesliTheme.callout())
                 .foregroundStyle(MuesliTheme.textTertiary)
         }
@@ -614,7 +614,7 @@ struct MeetingsView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "plus")
                         .font(.system(size: 11, weight: .semibold))
-                    Text("Quick Note")
+                    Text("Nota rápida")
                         .font(.system(size: 12, weight: .semibold))
                         .lineLimit(1)
                 }
@@ -626,7 +626,7 @@ struct MeetingsView: View {
             }
             .buttonStyle(.plain)
             .disabled(appState.isMeetingRecording || appState.isMeetingStarting)
-            .help("Start a quick meeting note")
+            .help("Iniciar uma nota rápida de reunião")
             .fixedSize()
 
             Button {
@@ -635,7 +635,7 @@ struct MeetingsView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "square.and.arrow.down")
                         .font(.system(size: 11, weight: .semibold))
-                    Text("Import Audio")
+                    Text("Importar áudio")
                         .font(.system(size: 12, weight: .semibold))
                         .lineLimit(1)
                 }
@@ -651,7 +651,7 @@ struct MeetingsView: View {
             }
             .buttonStyle(.plain)
             .disabled(appState.isMeetingRecording || appState.isMeetingStarting)
-            .help("Import an audio file for offline transcription")
+            .help("Importar um arquivo de áudio para transcrição offline")
             .fixedSize()
 
             sortButton
@@ -663,7 +663,7 @@ struct MeetingsView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "square.and.pencil")
                         .font(.system(size: 11, weight: .medium))
-                    Text("Manage Templates")
+                    Text("Gerenciar modelos")
                         .font(.system(size: 12, weight: .semibold))
                         .lineLimit(1)
                 }
@@ -709,7 +709,7 @@ struct MeetingsView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "square.and.pencil")
                         .font(.system(size: 11, weight: .semibold))
-                    Text("Open Notes")
+                    Text("Abrir notas")
                         .font(.system(size: 12, weight: .semibold))
                 }
                 .foregroundStyle(MuesliTheme.textPrimary)
@@ -727,7 +727,7 @@ struct MeetingsView: View {
                     HStack(spacing: 6) {
                         Image(systemName: appState.isMeetingRecordingPaused ? "play.fill" : "pause.fill")
                             .font(.system(size: 10, weight: .semibold))
-                        Text(appState.isMeetingRecordingPaused ? "Resume" : "Pause")
+                        Text(appState.isMeetingRecordingPaused ? "Retomar" : "Pausar")
                             .font(.system(size: 12, weight: .semibold))
                     }
                     .foregroundStyle(appState.isMeetingRecordingPaused ? MuesliTheme.backgroundBase : MuesliTheme.textPrimary)
@@ -749,7 +749,7 @@ struct MeetingsView: View {
                     HStack(spacing: 6) {
                         Image(systemName: "stop.fill")
                             .font(.system(size: 10, weight: .semibold))
-                        Text("Stop")
+                        Text("Encerrar")
                             .font(.system(size: 12, weight: .semibold))
                     }
                     .foregroundStyle(.white)
@@ -772,8 +772,8 @@ struct MeetingsView: View {
     }
 
     private func activeMeetingStatusText(for meeting: MeetingRecord) -> String {
-        guard meeting.status == .recording else { return "Finalizing notes" }
-        return appState.isMeetingRecordingPaused ? "Recording paused" : "Recording now"
+        guard meeting.status == .recording else { return "Finalizando notas" }
+        return appState.isMeetingRecordingPaused ? "Gravação pausada" : "Gravando agora"
     }
 
     private func activeMeetingStatusColor(for meeting: MeetingRecord) -> Color {
@@ -880,20 +880,20 @@ struct MeetingsView: View {
     private var emptyStateTitle: String {
         switch appState.meetingOriginFilter {
         case .thisMac:
-            return "No meetings from this Mac"
+            return "Não há reuniões deste Mac"
         case .fromIPhone:
-            return "No meetings from iPhone"
+            return "Não há reuniões do iPhone"
         case .all:
-            return appState.selectedFolderID == nil ? "No meetings yet" : "No meetings in this folder"
+            return appState.selectedFolderID == nil ? "Ainda não há reuniões" : "Não há reuniões nesta pasta"
         }
     }
 
     private var emptyStateInstruction: String {
         if appState.meetingOriginFilter != .all || selectedFilter != .all {
-            return "Try another source, time range, or folder."
+            return "Tente outra origem, período ou pasta."
         }
         return appState.selectedFolderID == nil
-            ? "Start a recording from the menu bar to create your first meeting note."
-            : "Choose another folder or move a meeting here from the browser."
+            ? "Inicie uma gravação pela barra de menus para criar sua primeira nota de reunião."
+            : "Escolha outra pasta ou mova uma reunião para cá pelo navegador."
     }
 }
