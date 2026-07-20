@@ -417,6 +417,8 @@ final class MuesliController: NSObject {
     ) {
         self.configStore = configStore
         var loadedConfig = configStore.load()
+        loadedConfig.enforcePortugueseWhisperMeetingDefaults()
+        configStore.save(loadedConfig)
         let loadedBackend = BackendOption.all.first(where: {
             $0.backend == loadedConfig.sttBackend && $0.model == loadedConfig.sttModel
         }) ?? .whisper
@@ -1228,6 +1230,7 @@ final class MuesliController: NSObject {
         let previousEnableDictionaryCorrectionPrompts = config.enableDictionaryCorrectionPrompts
         let previousEnableLiveStreamingPartials = config.enableLiveStreamingPartials
         mutate(&config)
+        config.enforcePortugueseWhisperMeetingDefaults()
         if previousEnableLiveStreamingPartials, !config.enableLiveStreamingPartials {
             preparingMeetingSession?.stopStreamingPartials()
             activeMeetingSession?.stopStreamingPartials()

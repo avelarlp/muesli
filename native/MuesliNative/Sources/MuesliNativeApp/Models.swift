@@ -109,8 +109,8 @@ struct BackendOption: Equatable {
         recommended: false
     )
 
-    // Default alias
-    static let whisper = parakeetMultilingual
+    // Default alias for this fork: Portuguese-first Whisper via CoreML.
+    static let whisper = whisperLargeTurbo
 
     static let parakeetFamily: [BackendOption] = [
         .parakeetMultilingual, .parakeetEnglish,
@@ -146,7 +146,7 @@ struct BackendOption: Equatable {
     /// Curated first-run choices shown in onboarding's "Other models" section.
     /// This is a deliberate hand-picked list, not a derived rule. Experimental models
     /// are excluded by default.
-    static let onboarding: [BackendOption] = [.parakeetMultilingual, .whisperTinyEnglish, .whisperSmall, .cohereTranscribe, .nemotron35Multilingual]
+    static let onboarding: [BackendOption] = [.whisperLargeTurbo, .parakeetMultilingual, .whisperTinyEnglish, .whisperSmall, .cohereTranscribe, .nemotron35Multilingual]
 
     /// Models coming soon — shown greyed out in the Models tab.
     static let comingSoon: [BackendOption] = []
@@ -1118,6 +1118,14 @@ struct AppConfig: Codable {
     var contributionBuyMeCoffeeClicked: Bool = false
     var contributionTweetClicked: Bool = false
     var contributionLinkedInClicked: Bool = false
+
+    mutating func enforcePortugueseWhisperMeetingDefaults() {
+        meetingTranscriptionBackend = BackendOption.whisperLargeTurbo.backend
+        meetingTranscriptionModel = BackendOption.whisperLargeTurbo.model
+        whisperModel = BackendOption.whisperLargeTurbo.model
+        meetingLiveCaptionBackend = MeetingLiveCaptionBackend.whisperPortuguese.rawValue
+        enableLiveStreamingPartials = true
+    }
 
     enum CodingKeys: String, CodingKey {
         case dictationHotkey = "dictation_hotkey"

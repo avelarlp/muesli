@@ -117,7 +117,7 @@ struct SettingsView: View {
     }
 
     private var meetingBackendOptions: [BackendOption] {
-        downloadedBackendOptions.filter(\.supportsMeetingTranscription)
+        downloadedBackendOptions.contains(.whisperLargeTurbo) ? [.whisperLargeTurbo] : []
     }
 
     private var selectedMeetingLiveCaptionLabel: String {
