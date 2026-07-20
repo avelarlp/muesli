@@ -997,6 +997,12 @@ enum OnboardingUseCase: String, Codable, CaseIterable {
 }
 
 struct AppConfig: Codable {
+    static var defaultMeetingExportFolderPath: String {
+        FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Documents/Muesli Meeting Exports", isDirectory: true)
+            .path
+    }
+
     var dictationHotkey: HotkeyConfig = .default
     /// Marks migration away from the unreliable modifier-only default. Keeping
     /// this lets someone deliberately choose Right Option later without it
@@ -1028,8 +1034,8 @@ struct AppConfig: Codable {
     var scheduledMeetingNotificationLeadTime: ScheduledMeetingNotificationLeadTime = .atStart
     var showMeetingDetectionNotification: Bool = true
     var mutedMeetingDetectionAppBundleIDs: [String] = []
-    var meetingRecordingSavePolicy: MeetingRecordingSavePolicy = .never
-    var meetingRecordingFileFormat: String = MeetingRecordingFileFormat.m4a.rawValue
+    var meetingRecordingSavePolicy: MeetingRecordingSavePolicy = .always
+    var meetingRecordingFileFormat: String = MeetingRecordingFileFormat.mp3.rawValue
     var waveformCacheOrphanCleanupMigrationApplied: Bool = false
     var darkMode: Bool = true
     var enableDoubleTapDictation: Bool = true
@@ -1106,9 +1112,9 @@ struct AppConfig: Codable {
     var meetingHookEnabled: Bool = false
     var meetingHookPath: String = ""
     var meetingHookTimeoutSeconds: Int = 30
-    var autoExportMarkdownEnabled: Bool = false
-    var autoExportMarkdownFolderPath: String = ""
-    var autoExportMarkdownContent: String = MeetingExportContent.notes.rawValue
+    var autoExportMarkdownEnabled: Bool = true
+    var autoExportMarkdownFolderPath: String = AppConfig.defaultMeetingExportFolderPath
+    var autoExportMarkdownContent: String = MeetingExportContent.transcript.rawValue
     var autoExportFileFormat: String = MeetingAutoExportFileFormat.markdown.rawValue
     var iCloudSyncEnabled: Bool = false
     var showIOSCompanionPrompt: Bool = true
@@ -1125,6 +1131,14 @@ struct AppConfig: Codable {
         whisperModel = BackendOption.whisperLargeTurbo.model
         meetingLiveCaptionBackend = MeetingLiveCaptionBackend.whisperPortuguese.rawValue
         enableLiveStreamingPartials = true
+        meetingRecordingSavePolicy = .always
+        meetingRecordingFileFormat = MeetingRecordingFileFormat.mp3.rawValue
+        autoExportMarkdownEnabled = true
+        if autoExportMarkdownFolderPath.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            autoExportMarkdownFolderPath = AppConfig.defaultMeetingExportFolderPath
+        }
+        autoExportMarkdownContent = MeetingExportContent.transcript.rawValue
+        autoExportFileFormat = MeetingAutoExportFileFormat.markdown.rawValue
     }
 
     enum CodingKeys: String, CodingKey {

@@ -9,9 +9,9 @@ enum MeetingExportContent: String, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .notes: return "Notes"
-        case .transcript: return "Transcript"
-        case .fullMeeting: return "Full Meeting"
+        case .notes: return "Resumo"
+        case .transcript: return "Transcrição"
+        case .fullMeeting: return "Reunião completa"
         }
     }
 
@@ -29,7 +29,7 @@ enum MeetingAutoExportFileFormat: String, CaseIterable {
         switch self {
         case .markdown: return "Markdown"
         case .pdf: return "PDF"
-        case .markdownAndPDF: return "Markdown and PDF"
+        case .markdownAndPDF: return "Markdown e PDF"
         }
     }
 
@@ -126,6 +126,39 @@ struct MeetingExporter {
         }
 
         return parts.joined(separator: "\n")
+    }
+
+    static func buildCleanupPromptMarkdown(meeting: MeetingRecord) -> String {
+        """
+        # Prompt para limpar e corrigir a transcrição
+
+        Anexe junto a este prompt o arquivo Markdown da transcrição bruta desta reunião.
+
+        Reunião: \(meeting.title)
+        Data: \(formatExportDate(meeting.startTime))
+        Duração: \(formatExportDuration(meeting.durationSeconds))
+
+        Você é um editor especializado em transcrições de reuniões em português do Brasil.
+
+        Tarefa:
+        1. Limpe e corrija a transcrição anexada.
+        2. Corrija erros óbvios de ASR, pontuação, capitalização e quebras de parágrafo.
+        3. Preserve o sentido original, a ordem dos tópicos e nomes próprios sempre que possível.
+        4. Remova repetições, falsos inícios, muletas excessivas e alucinações claras de silêncio.
+        5. Não invente falas, decisões, números, nomes ou tarefas que não estejam na transcrição.
+        6. Quando algo estiver incerto, mantenha a melhor hipótese e marque com `[inaudível/incerto]` apenas se necessário.
+        7. Se houver participantes identificados como Speaker, You ou Others, preserve os rótulos quando eles ajudarem o entendimento.
+
+        Entregue em Markdown com esta estrutura:
+
+        ## Transcrição corrigida
+
+        Texto corrigido, organizado em parágrafos e, quando útil, por falante.
+
+        ## Dúvidas ou trechos incertos
+
+        Liste apenas os pontos que precisam de revisão humana. Se não houver, escreva: Nenhum ponto crítico.
+        """
     }
 
     // MARK: - Write files

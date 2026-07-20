@@ -53,8 +53,8 @@ struct MeetingMarkdownAutoExporterTests {
         #expect(log.contains("must be an absolute path"))
     }
 
-    @Test("writes notes markdown file to destination folder")
-    func writesNotesFile() async throws {
+    @Test("writes meeting package markdown files to destination folder")
+    func writesMeetingPackageFiles() async throws {
         let support = makeTemporaryDirectory()
         let destination = makeTemporaryDirectory()
         let exporter = MeetingMarkdownAutoExporter(supportDirectory: support)
@@ -62,17 +62,23 @@ struct MeetingMarkdownAutoExporterTests {
         config.autoExportMarkdownEnabled = true
         config.autoExportMarkdownFolderPath = destination.path
 
-        let url = await exporter.performExport(meeting: makeMeeting(), config: config)?.first
+        let urls = try #require(await exporter.performExport(meeting: makeMeeting(), config: config))
 
-        let written = try #require(url)
-        #expect(written.pathExtension == "md")
-        let contents = try String(contentsOf: written, encoding: .utf8)
-        #expect(contents.contains("# Weekly Standup"))
-        #expect(contents.contains("## Key Points"))
-        #expect(contents.contains("Ship export feature"))
+        #expect(urls.count == 3)
+        #expect(Set(urls.map(\.lastPathComponent)) == Set([
+            "2026-04-14-weekly-standup-transcript.md",
+            "2026-04-14-weekly-standup-cleanup-prompt.md",
+            "2026-04-14-weekly-standup-summary.md",
+        ]))
+        let transcript = try String(contentsOf: try #require(urls.first { $0.lastPathComponent.hasSuffix("-transcript.md") }), encoding: .utf8)
+        let prompt = try String(contentsOf: try #require(urls.first { $0.lastPathComponent.hasSuffix("-cleanup-prompt.md") }), encoding: .utf8)
+        let summary = try String(contentsOf: try #require(urls.first { $0.lastPathComponent.hasSuffix("-summary.md") }), encoding: .utf8)
+        #expect(transcript.contains("## Raw Transcript"))
+        #expect(prompt.contains("Prompt para limpar e corrigir"))
+        #expect(summary.contains("## Key Points"))
     }
 
-    @Test("filename includes date prefix and -notes suffix")
+    @Test("filename includes date prefix and transcript suffix")
     func filenameHasDatePrefix() async throws {
         let support = makeTemporaryDirectory()
         let destination = makeTemporaryDirectory()
@@ -83,10 +89,10 @@ struct MeetingMarkdownAutoExporterTests {
 
         let url = try #require(await exporter.performExport(meeting: makeMeeting(), config: config)?.first)
 
-        #expect(url.lastPathComponent == "2026-04-14-weekly-standup-notes.md")
+        #expect(url.lastPathComponent == "2026-04-14-weekly-standup-transcript.md")
     }
 
-    @Test("transcript content option exports raw transcript")
+    @Test("transcript package includes raw transcript")
     func transcriptContentOption() async throws {
         let support = makeTemporaryDirectory()
         let destination = makeTemporaryDirectory()
@@ -96,7 +102,8 @@ struct MeetingMarkdownAutoExporterTests {
         config.autoExportMarkdownFolderPath = destination.path
         config.autoExportMarkdownContent = MeetingExportContent.transcript.rawValue
 
-        let url = try #require(await exporter.performExport(meeting: makeMeeting(), config: config)?.first)
+        let urls = try #require(await exporter.performExport(meeting: makeMeeting(), config: config))
+        let url = try #require(urls.first { $0.lastPathComponent.hasSuffix("-transcript.md") })
 
         #expect(url.lastPathComponent.hasSuffix("-transcript.md"))
         let contents = try String(contentsOf: url, encoding: .utf8)
@@ -116,8 +123,8 @@ struct MeetingMarkdownAutoExporterTests {
         let first = try #require(await exporter.performExport(meeting: makeMeeting(), config: config)?.first)
         let second = try #require(await exporter.performExport(meeting: makeMeeting(), config: config)?.first)
 
-        #expect(first.lastPathComponent == "2026-04-14-weekly-standup-notes.md")
-        #expect(second.lastPathComponent == "2026-04-14-weekly-standup-notes-2.md")
+        #expect(first.lastPathComponent == "2026-04-14-weekly-standup-transcript.md")
+        #expect(second.lastPathComponent == "2026-04-14-weekly-standup-transcript-2.md")
         #expect(FileManager.default.fileExists(atPath: first.path))
         #expect(FileManager.default.fileExists(atPath: second.path))
     }
@@ -190,7 +197,7 @@ struct MeetingMarkdownAutoExporterTests {
 
         #expect(urls.count == 1)
         let url = try #require(urls.first)
-        #expect(url.lastPathComponent == "2026-04-14-weekly-standup-notes.pdf")
+        #expect(url.lastPathComponent == "2026-04-14-weekly-standup.pdf")
         #expect(try Data(contentsOf: url).starts(with: Data("%PDF".utf8)))
     }
 
@@ -207,7 +214,7 @@ struct MeetingMarkdownAutoExporterTests {
         let urls = try #require(await exporter.performExport(meeting: makeMeeting(), config: config))
         let extensions = Set(urls.map(\.pathExtension))
 
-        #expect(urls.count == 2)
+        #expect(urls.count == 4)
         #expect(extensions == ["md", "pdf"])
         for url in urls {
             #expect(FileManager.default.fileExists(atPath: url.path))

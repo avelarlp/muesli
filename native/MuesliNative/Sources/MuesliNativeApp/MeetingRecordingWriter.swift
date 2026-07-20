@@ -3,20 +3,25 @@ import Foundation
 import os
 
 enum MeetingRecordingFileFormat: String, CaseIterable, Sendable {
+    case mp3
     case m4a
     case wav
 
     var displayName: String {
         switch self {
+        case .mp3:
+            return "MP3 (compatível)"
         case .m4a:
-            return "M4A (AAC, smaller)"
+            return "M4A (AAC, menor)"
         case .wav:
-            return "WAV (lossless)"
+            return "WAV (sem perdas)"
         }
     }
 
     var fileExtension: String {
         switch self {
+        case .mp3:
+            return "mp3"
         case .m4a:
             return "m4a"
         case .wav:
@@ -25,7 +30,7 @@ enum MeetingRecordingFileFormat: String, CaseIterable, Sendable {
     }
 
     static func resolved(_ rawValue: String) -> MeetingRecordingFileFormat {
-        MeetingRecordingFileFormat(rawValue: rawValue) ?? .m4a
+        MeetingRecordingFileFormat(rawValue: rawValue) ?? .mp3
     }
 }
 
@@ -118,7 +123,7 @@ final class MeetingRecordingWriter {
         meetingTitle: String,
         startedAt: Date,
         supportDirectory: URL,
-        fileFormat: MeetingRecordingFileFormat = .m4a
+        fileFormat: MeetingRecordingFileFormat = .mp3
     ) async throws -> URL {
         let recordingsDirectory = supportDirectory
             .appendingPathComponent("meeting-recordings", isDirectory: true)
@@ -134,6 +139,14 @@ final class MeetingRecordingWriter {
             try FileManager.default.removeItem(at: destinationURL)
         }
         switch fileFormat {
+        case .mp3:
+            do {
+                try await transcodeWAVToMP3Async(sourceURL: tempURL, destinationURL: destinationURL)
+                try FileManager.default.removeItem(at: tempURL)
+            } catch {
+                try? FileManager.default.removeItem(at: destinationURL)
+                throw error
+            }
         case .m4a:
             do {
                 try await transcodeWAVToM4AAsync(sourceURL: tempURL, destinationURL: destinationURL)
@@ -157,6 +170,108 @@ final class MeetingRecordingWriter {
                 state.pendingSystem.append(contentsOf: samples)
             }
             writeMixedSamples(state: &state, flushAll: false)
+        }
+    }
+
+    private static func transcodeWAVToMP3Async(sourceURL: URL, destinationURL: URL) async throws {
+        try await Task.detached(priority: .utility) {
+            try transcodeWAVToMP3(sourceURL: sourceURL, destinationURL: destinationURL)
+        }.value
+    }
+
+    private static func transcodeWAVToMP3(sourceURL: URL, destinationURL: URL) throws {
+        if let ffmpegURL = firstExecutable(named: "ffmpeg") {
+            try runEncoder(
+                executableURL: ffmpegURL,
+                arguments: [
+                    "-y",
+                    "-hide_banner",
+                    "-loglevel", "error",
+                    "-i", sourceURL.path,
+                    "-vn",
+                    "-ac", "1",
+                    "-ar", "16000",
+                    "-codec:a", "libmp3lame",
+                    "-b:a", "96k",
+                    destinationURL.path
+                ],
+                failureDescription: "Não foi possível exportar a gravação da reunião em MP3 com ffmpeg."
+            )
+            return
+        }
+
+        if let lameURL = firstExecutable(named: "lame") {
+            try runEncoder(
+                executableURL: lameURL,
+                arguments: [
+                    "--silent",
+                    "-b", "96",
+                    "-m", "m",
+                    sourceURL.path,
+                    destinationURL.path
+                ],
+                failureDescription: "Não foi possível exportar a gravação da reunião em MP3 com lame."
+            )
+            return
+        }
+
+        throw NSError(
+            domain: "MeetingRecordingWriter",
+            code: 4,
+            userInfo: [
+                NSLocalizedDescriptionKey: "Não encontrei ffmpeg nem lame para exportar a gravação da reunião em MP3."
+            ]
+        )
+    }
+
+    private static func firstExecutable(named executableName: String) -> URL? {
+        let manager = FileManager.default
+        let pathCandidates = [
+            "/opt/homebrew/bin",
+            "/usr/local/bin",
+            "/usr/bin",
+            "/bin"
+        ] + (ProcessInfo.processInfo.environment["PATH"] ?? "")
+            .split(separator: ":")
+            .map(String.init)
+
+        for directory in pathCandidates {
+            let url = URL(fileURLWithPath: directory).appendingPathComponent(executableName)
+            if manager.isExecutableFile(atPath: url.path) {
+                return url
+            }
+        }
+        return nil
+    }
+
+    private static func runEncoder(
+        executableURL: URL,
+        arguments: [String],
+        failureDescription: String
+    ) throws {
+        let process = Process()
+        process.executableURL = executableURL
+        process.arguments = arguments
+
+        let errorPipe = Pipe()
+        process.standardError = errorPipe
+        process.standardOutput = Pipe()
+
+        try process.run()
+        process.waitUntilExit()
+
+        guard process.terminationStatus == 0 else {
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorOutput = String(data: errorData, encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            throw NSError(
+                domain: "MeetingRecordingWriter",
+                code: Int(process.terminationStatus),
+                userInfo: [
+                    NSLocalizedDescriptionKey: errorOutput.map { "\($0)\n\(failureDescription)" }
+                        ?? failureDescription
+                ]
+            )
         }
     }
 

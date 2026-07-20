@@ -1336,19 +1336,19 @@ struct SettingsView: View {
                 }
             }
 
-            settingsSection("Auto Export") {
-                settingsRow("Auto-export meetings") {
+            settingsSection("Exportação automática") {
+                settingsRow("Exportar reuniões automaticamente") {
                     settingsSwitch(isOn: appState.config.autoExportMarkdownEnabled) { newValue in
                         controller.updateConfig { $0.autoExportMarkdownEnabled = newValue }
                     }
                 }
                 if appState.config.autoExportMarkdownEnabled {
                     Divider().background(MuesliTheme.surfaceBorder)
-                    settingsRow("Destination folder") {
+                    settingsRow("Pasta de destino") {
                         autoExportFolderPicker
                     }
                     Divider().background(MuesliTheme.surfaceBorder)
-                    settingsRow("Content") {
+                    settingsRow("Conteúdo") {
                         settingsMenu(
                             selection: appState.config.resolvedAutoExportMarkdownContent.displayName,
                             options: MeetingExportContent.allCases.map(\.displayName)
@@ -1359,7 +1359,7 @@ struct SettingsView: View {
                         }
                     }
                     Divider().background(MuesliTheme.surfaceBorder)
-                    settingsRow("File format") {
+                    settingsRow("Formato do arquivo") {
                         settingsMenu(
                             selection: appState.config.resolvedAutoExportFileFormat.displayName,
                             options: MeetingAutoExportFileFormat.allCases.map(\.displayName)
@@ -1369,7 +1369,7 @@ struct SettingsView: View {
                         }
                     }
                 }
-                Text("Automatically saves each completed meeting to the chosen folder in the selected format.")
+                Text("Salva cada reunião finalizada na pasta escolhida com transcrição, prompt de limpeza e resumo em Markdown.")
                     .font(MuesliTheme.caption())
                     .foregroundStyle(MuesliTheme.textTertiary)
                     .padding(.horizontal, MuesliTheme.spacing16)

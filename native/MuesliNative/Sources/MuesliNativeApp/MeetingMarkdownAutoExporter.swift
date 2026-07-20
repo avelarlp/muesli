@@ -33,6 +33,11 @@ final class MeetingMarkdownAutoExporter: MeetingMarkdownAutoExporting {
         supportDirectory.appendingPathComponent("meeting-markdown-export.log")
     }
 
+    private struct MarkdownPayload {
+        let stemSuffix: String
+        let markdown: String
+    }
+
     func exportIfConfigured(meeting: MeetingRecord, config: AppConfig) {
         guard config.autoExportMarkdownEnabled else { return }
         Task.detached(priority: .utility) { [self] in
@@ -70,23 +75,24 @@ final class MeetingMarkdownAutoExporter: MeetingMarkdownAutoExporting {
             return nil
         }
 
-        let content = config.resolvedAutoExportMarkdownContent
         let fileFormat = config.resolvedAutoExportFileFormat
-        let markdown = MeetingExporter.buildMarkdown(meeting: meeting, content: content)
         var writtenURLs: [URL] = []
 
         if fileFormat.includesMarkdown {
-            do {
-                let destinationURL = try writeMarkdown(markdown, in: folderURL, meeting: meeting, content: content)
-                writtenURLs.append(destinationURL)
-            } catch {
-                writeLog("export failed: id=\(meeting.id) format=markdown error=\(error.localizedDescription)")
+            for payload in markdownPackage(for: meeting) {
+                do {
+                    let destinationURL = try writeMarkdown(payload.markdown, in: folderURL, meeting: meeting, stemSuffix: payload.stemSuffix)
+                    writtenURLs.append(destinationURL)
+                } catch {
+                    writeLog("export failed: id=\(meeting.id) file=\(payload.stemSuffix).md error=\(error.localizedDescription)")
+                }
             }
         }
 
         if fileFormat.includesPDF {
             do {
-                let destinationURL = try await writePDF(markdown, in: folderURL, meeting: meeting, content: content)
+                let markdown = MeetingExporter.buildMarkdown(meeting: meeting, content: .fullMeeting)
+                let destinationURL = try await writePDF(markdown, in: folderURL, meeting: meeting, content: .fullMeeting)
                 writtenURLs.append(destinationURL)
             } catch {
                 writeLog("export failed: id=\(meeting.id) format=pdf error=\(error.localizedDescription)")
@@ -102,15 +108,32 @@ final class MeetingMarkdownAutoExporter: MeetingMarkdownAutoExporting {
         return writtenURLs
     }
 
+    private func markdownPackage(for meeting: MeetingRecord) -> [MarkdownPayload] {
+        [
+            MarkdownPayload(
+                stemSuffix: "transcript",
+                markdown: MeetingExporter.buildMarkdown(meeting: meeting, content: .transcript)
+            ),
+            MarkdownPayload(
+                stemSuffix: "cleanup-prompt",
+                markdown: MeetingExporter.buildCleanupPromptMarkdown(meeting: meeting)
+            ),
+            MarkdownPayload(
+                stemSuffix: "summary",
+                markdown: MeetingExporter.buildMarkdown(meeting: meeting, content: .notes)
+            ),
+        ]
+    }
+
     // MARK: - Filename
 
     private func writeMarkdown(
         _ markdown: String,
         in folder: URL,
         meeting: MeetingRecord,
-        content: MeetingExportContent
+        stemSuffix: String
     ) throws -> URL {
-        let baseName = baseFilename(meeting: meeting, content: content, fileExtension: "md")
+        let baseName = "\(baseStem(meeting: meeting))-\(stemSuffix)"
         let data = Data(markdown.utf8)
         let firstCandidate = folder.appendingPathComponent("\(baseName).md")
         if try write(data, toNewFileAt: firstCandidate) {
@@ -217,6 +240,15 @@ final class MeetingMarkdownAutoExporter: MeetingMarkdownAutoExporting {
     }
 
     private static let maxCollisionAttempts = 1000
+
+    private func baseStem(meeting: MeetingRecord) -> String {
+        let filename = MeetingExporter.suggestedFilename(meeting: meeting, content: .fullMeeting, fileExtension: "md")
+        let stem = (filename as NSString).deletingPathExtension
+        if let datePrefix = Self.datePrefix(from: meeting.startTime) {
+            return "\(datePrefix)-\(stem)"
+        }
+        return stem
+    }
 
     private func baseFilename(
         meeting: MeetingRecord,
