@@ -15,11 +15,11 @@ struct ShortcutsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: MuesliTheme.spacing24) {
-                Text("Shortcuts")
+                Text("Atalhos")
                     .font(MuesliTheme.title1())
                     .foregroundStyle(MuesliTheme.textPrimary)
 
-                Text("Choose your preferred shortcuts for dictation and computer use commands.")
+                Text("Escolha os atalhos para ditado, reuniões e comandos no computador.")
                     .font(MuesliTheme.body())
                     .foregroundStyle(MuesliTheme.textSecondary)
 
@@ -51,10 +51,10 @@ struct ShortcutsView: View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing16) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: MuesliTheme.spacing4) {
-                    Text("Push to Talk")
+                    Text("Ditado")
                         .font(MuesliTheme.headline())
                         .foregroundStyle(MuesliTheme.textPrimary)
-                    Text("Hold to record, release to transcribe")
+                    Text("Use ⌃⌥D para iniciar ou parar. Você também pode escolher outro atalho.")
                         .font(MuesliTheme.caption())
                         .foregroundStyle(MuesliTheme.textSecondary)
                 }
@@ -89,10 +89,10 @@ struct ShortcutsView: View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing16) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: MuesliTheme.spacing4) {
-                    Text("Computer Use Command")
+                    Text("Comando no computador")
                         .font(MuesliTheme.headline())
                         .foregroundStyle(MuesliTheme.textPrimary)
-                    Text("Hold to record a command, release to plan and run it")
+                    Text("Grave um comando para o assistente planejar e executar")
                         .font(MuesliTheme.caption())
                         .foregroundStyle(MuesliTheme.textSecondary)
                 }
@@ -143,10 +143,10 @@ struct ShortcutsView: View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing16) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: MuesliTheme.spacing4) {
-                    Text("Meeting Recording")
+                    Text("Gravação de reunião")
                         .font(MuesliTheme.headline())
                         .foregroundStyle(MuesliTheme.textPrimary)
-                    Text("Toggle meeting recording on/off")
+                    Text("Inicia ou encerra a gravação da reunião")
                         .font(MuesliTheme.caption())
                         .foregroundStyle(MuesliTheme.textSecondary)
                 }
@@ -239,7 +239,7 @@ struct ShortcutsView: View {
 
     private func thresholdInput(value: Int, onChange: @escaping (Int) -> Void) -> some View {
         HStack(spacing: MuesliTheme.spacing8) {
-            Text("Hold")
+            Text("Segurar")
                 .font(MuesliTheme.caption())
                 .foregroundStyle(MuesliTheme.textSecondary)
 
@@ -269,7 +269,7 @@ struct ShortcutsView: View {
                 .font(MuesliTheme.caption())
                 .foregroundStyle(MuesliTheme.textSecondary)
         }
-        .help("Hold threshold: \(HotkeyTriggerTiming.minThresholdMilliseconds)-\(HotkeyTriggerTiming.maxThresholdMilliseconds) ms")
+        .help("Tempo de retenção: \(HotkeyTriggerTiming.minThresholdMilliseconds)-\(HotkeyTriggerTiming.maxThresholdMilliseconds) ms")
     }
 
     private func shortcutMessage(_ message: String) -> some View {
@@ -286,7 +286,7 @@ struct ShortcutsView: View {
                 startRecording(target)
             }
         } label: {
-            Text(recordingTarget == target ? recordingPrompt(for: target) : "Change Shortcut")
+            Text(recordingTarget == target ? recordingPrompt(for: target) : "Alterar atalho")
                 .font(MuesliTheme.body())
                 .foregroundStyle(recordingTarget == target ? MuesliTheme.accent : MuesliTheme.textPrimary)
         }
@@ -304,9 +304,9 @@ struct ShortcutsView: View {
     private func recordingPrompt(for target: ShortcutTarget) -> String {
         switch target {
         case .meetingRecording:
-            return "Press a key or modifier..."
+            return "Pressione uma combinação..."
         case .dictation, .computerUse:
-            return "Press a modifier key..."
+            return "Pressione uma combinação ou modificador..."
         }
     }
 
@@ -314,10 +314,10 @@ struct ShortcutsView: View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing16) {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: MuesliTheme.spacing4) {
-                    Text("Hands-Free Mode")
+                    Text("Modo mãos livres")
                         .font(MuesliTheme.headline())
                         .foregroundStyle(MuesliTheme.textPrimary)
-                    Text("Double-tap dictation or CUA to start, tap again to stop")
+                    Text("Toque duas vezes no atalho para iniciar e toque novamente para parar")
                         .font(MuesliTheme.caption())
                         .foregroundStyle(MuesliTheme.textSecondary)
                 }
@@ -349,7 +349,7 @@ struct ShortcutsView: View {
             computerUseShortcutMessage = nil
             meetingRecordingShortcutMessage = nil
         } label: {
-            Text("Reset to Defaults")
+            Text("Restaurar padrões")
                 .font(MuesliTheme.body())
                 .foregroundStyle(MuesliTheme.textSecondary)
         }
@@ -380,8 +380,7 @@ struct ShortcutsView: View {
                 let mods = HotkeyConfig.supportedCombinationModifiers(from: event.modifierFlags)
                 let hasModifiers = mods.contains(.command) || mods.contains(.control)
                     || mods.contains(.option)
-                guard target == .meetingRecording,
-                      hasModifiers,
+                guard hasModifiers,
                       HotkeyConfig.letterLabel(for: event.keyCode) != nil else {
                     return event
                 }

@@ -44,19 +44,19 @@ struct SidebarView: View {
         switch appState.sparkleUpdateStatus {
         case .available:
             return UpdateCTA(
-                label: "Update",
+                label: "Atualizar",
                 icon: "arrow.down",
                 foreground: updateCTAForeground,
-                accessibilityLabel: "Update available",
-                tooltip: "Open About for update instructions"
+                accessibilityLabel: "Atualização disponível",
+                tooltip: "Abra Sobre para ver as instruções de atualização"
             )
         case .downloaded:
             return UpdateCTA(
-                label: "Ready",
+                label: "Pronto",
                 icon: "arrow.clockwise",
                 foreground: updateCTAForeground,
-                accessibilityLabel: "Update ready to install",
-                tooltip: "Open About for update instructions"
+                accessibilityLabel: "Atualização pronta para instalar",
+                tooltip: "Abra Sobre para ver as instruções de atualização"
             )
         case .idle, .checking, .busy, .installing, .upToDate, .disabled, .failed:
             return nil
@@ -102,18 +102,18 @@ struct SidebarView: View {
             sidebarHeader
             searchBar
 
-            sidebarItem(tab: .dictations, icon: "mic.fill", label: "Dictations")
+            sidebarItem(tab: .dictations, icon: "mic.fill", label: "Ditados")
             meetingsSection
-            sidebarItem(tab: .dictionary, icon: "character.book.closed", label: "Dictionary")
-            sidebarItem(tab: .models, icon: "square.and.arrow.down", label: "Models")
-            sidebarItem(tab: .shortcuts, icon: "keyboard", label: "Shortcuts")
+            sidebarItem(tab: .dictionary, icon: "character.book.closed", label: "Dicionário")
+            sidebarItem(tab: .models, icon: "square.and.arrow.down", label: "Modelos")
+            sidebarItem(tab: .shortcuts, icon: "keyboard", label: "Atalhos")
 
             Spacer()
 
             modelPreparationStatus
             spreadTheWordSection
-            sidebarItem(tab: .settings, icon: "gearshape", label: "Settings")
-            sidebarItem(tab: .about, icon: "info.circle", label: "About", updateCTA: pendingUpdateCTA)
+            sidebarItem(tab: .settings, icon: "gearshape", label: "Ajustes")
+            sidebarItem(tab: .about, icon: "info.circle", label: "Sobre", updateCTA: pendingUpdateCTA)
             darkModeToggle
                 .padding(.bottom, MuesliTheme.spacing16)
         }
@@ -130,13 +130,13 @@ struct SidebarView: View {
             }
         }
         .alert(
-            "Delete \"\(folderToDelete?.name ?? "")\"?",
+            "Excluir \"\(folderToDelete?.name ?? "")\"?",
             isPresented: $showDeleteConfirmation
         ) {
-            Button("Cancel", role: .cancel) {
+            Button("Cancelar", role: .cancel) {
                 folderToDelete = nil
             }
-            Button("Delete", role: .destructive) {
+            Button("Excluir", role: .destructive) {
                 if let folder = folderToDelete {
                     controller.deleteFolder(id: folder.id)
                     controller.showMeetingsHome(folderID: appState.selectedFolderID)
@@ -148,9 +148,9 @@ struct SidebarView: View {
                 appState.directMeetingCountsByFolder[folder.id] ?? 0
             } ?? 0
             if directCount > 0 {
-                Text("\(directCount) meeting\(directCount == 1 ? "" : "s") in this folder will be moved to Unfiled. Subfolders will be kept.")
+                Text("\(directCount) reuni\(directCount == 1 ? "ão" : "ões") desta pasta será\(directCount == 1 ? "" : "ão") movida\(directCount == 1 ? "" : "s") para Sem pasta. As subpastas serão mantidas.")
             } else {
-                Text("This folder will be permanently removed. Subfolders will be kept.")
+                Text("Esta pasta será removida permanentemente. As subpastas serão mantidas.")
             }
         }
     }
@@ -176,7 +176,7 @@ struct SidebarView: View {
                     .foregroundStyle(MuesliTheme.textPrimary)
             }
             if !userName.isEmpty {
-                Text("Hi, \(userName)")
+                Text("Olá, \(userName)")
                     .font(MuesliTheme.caption())
                     .foregroundStyle(MuesliTheme.textTertiary)
                     .padding(.leading, 34)
@@ -193,7 +193,7 @@ struct SidebarView: View {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 12))
                 .foregroundStyle(MuesliTheme.textTertiary)
-            TextField("Search...", text: searchTextBinding)
+            TextField("Buscar...", text: searchTextBinding)
                 .textFieldStyle(.plain)
                 .font(MuesliTheme.callout())
                 .foregroundStyle(MuesliTheme.textPrimary)
@@ -244,7 +244,7 @@ struct SidebarView: View {
                             .font(.system(size: 14, weight: .medium))
                             .foregroundStyle(isSelected ? MuesliTheme.accent : MuesliTheme.textSecondary)
                             .frame(width: sidebarIconColumnWidth)
-                        Text("Meetings")
+                        Text("Reuniões")
                             .font(MuesliTheme.headline())
                             .foregroundStyle(isSelected ? MuesliTheme.textPrimary : MuesliTheme.textSecondary)
                         Spacer(minLength: 0)
@@ -273,7 +273,7 @@ struct SidebarView: View {
                         .frame(width: meetingsTrailingColumnWidth, height: 18)
                 }
                 .buttonStyle(.plain)
-                .help("New Meeting Folder")
+                .help("Nova pasta de reuniões")
             }
             .padding(.horizontal, sidebarRowHorizontalPadding)
             .padding(.vertical, MuesliTheme.spacing8)
@@ -291,7 +291,7 @@ struct SidebarView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     meetingFilterRow(
                         icon: "tray.2",
-                        label: "All Meetings",
+                        label: "Todas as reuniões",
                         count: appState.totalMeetingCount,
                         isSelected: appState.selectedTab == .meetings && appState.selectedFolderID == nil
                     ) {
@@ -330,20 +330,20 @@ struct SidebarView: View {
                                 commitOrder: { ids in controller.reorderFolders(ids: ids) }
                             ))
                             .contextMenu {
-                                Button("New Subfolder") {
+                                Button("Nova subpasta") {
                                     createNewSubfolder(parentID: folder.id)
                                 }
-                                Button("Rename") {
+                                Button("Renomear") {
                                     renamingFolderID = folder.id
                                     renamingFolderName = folder.name
                                 }
                                 if folder.parentID != nil {
-                                    Button("Move to Top Level") {
+                                    Button("Mover para o nível principal") {
                                         controller.moveFolder(id: folder.id, toParent: nil)
                                     }
                                 }
                                 Divider()
-                                Button("Delete", role: .destructive) {
+                                Button("Excluir", role: .destructive) {
                                     folderToDelete = folder
                                     showDeleteConfirmation = true
                                 }
@@ -415,7 +415,7 @@ struct SidebarView: View {
         )
         if wordMilestone != nil {
             VStack(alignment: .leading, spacing: 2) {
-                Text("Spread the Word")
+                Text("Compartilhe")
                     .font(.system(size: 11, weight: .semibold, design: .rounded))
                     .foregroundStyle(MuesliTheme.textTertiary)
                     .padding(.horizontal, sidebarRowHorizontalPadding)
@@ -424,13 +424,13 @@ struct SidebarView: View {
                 socialShareRow(
                     imageName: "x-logo",
                     fallbackIcon: "bubble.left.and.bubble.right.fill",
-                    label: "Tweet about Muesli",
+                    label: "Publicar no X sobre o Muesli",
                     action: { controller.openContributionSidebarShare(.tweetAboutMuesli) }
                 )
                 socialShareRow(
                     imageName: "linkedin-logo",
                     fallbackIcon: "person.crop.square.fill",
-                    label: "Post on LinkedIn",
+                    label: "Publicar no LinkedIn",
                     action: { controller.openContributionSidebarShare(.postOnLinkedIn) }
                 )
             }
@@ -635,7 +635,7 @@ struct SidebarView: View {
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(MuesliTheme.accent)
                 .frame(width: sidebarIconColumnWidth)
-            TextField("Folder name", text: $renamingFolderName)
+            TextField("Nome da pasta", text: $renamingFolderName)
                 .font(MuesliTheme.callout())
                 .textFieldStyle(.plain)
                 .onSubmit {
@@ -681,24 +681,24 @@ struct SidebarView: View {
     }
 
     private func createNewFolder() {
-        if let id = controller.createFolder(name: "New Folder") {
+        if let id = controller.createFolder(name: "Nova pasta") {
             withAnimation(.easeInOut(duration: 0.15)) {
                 meetingsExpanded = true
             }
             renamingFolderID = id
-            renamingFolderName = "New Folder"
+            renamingFolderName = "Nova pasta"
             controller.showMeetingsHome(folderID: id)
         }
     }
 
     private func createNewSubfolder(parentID: Int64) {
-        if let id = controller.createSubfolder(name: "New Folder", parentID: parentID) {
+        if let id = controller.createSubfolder(name: "Nova pasta", parentID: parentID) {
             withAnimation(.easeInOut(duration: 0.15)) {
                 meetingsExpanded = true
                 collapsedFolderIDs.remove(parentID)
             }
             renamingFolderID = id
-            renamingFolderName = "New Folder"
+            renamingFolderName = "Nova pasta"
             controller.showMeetingsHome(folderID: id)
         }
     }

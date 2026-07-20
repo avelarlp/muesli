@@ -315,17 +315,11 @@ final class HotkeyMonitor {
         else { return false }
 
         combinationKeyDown = true
-        combinationTriggered = false
+        combinationTriggered = true
         combinationWorkItem?.cancel()
-        let item = DispatchWorkItem { [weak self] in
-            guard let self, self.combinationKeyDown, !self.combinationTriggered else { return }
-            self.combinationTriggered = true
-            self.combinationWorkItem = nil
-            self.fireCombinationToggle()
-        }
-        combinationWorkItem = item
-        scheduleAfter(startDelay, item)
-        fputs("[hotkey] combination armed\n", stderr)
+        combinationWorkItem = nil
+        fputs("[hotkey] combination triggered\n", stderr)
+        fireCombinationToggle()
         return true
     }
 
@@ -370,6 +364,11 @@ final class HotkeyMonitor {
     ) -> Bool {
         let isTextEditing = firstResponder is NSTextView || firstResponder is NSTextField
         guard isTextEditing else { return true }
+
+        // A combination is a deliberate command and can be safely consumed even
+        // while a Muesli text field is active. This prevents the final letter
+        // from being inserted into a field and makes the shortcut predictable.
+        if isCombinationMode { return true }
 
         // Text editing owns fresh hotkey starts, but an already-armed hotkey
         // session must still receive key-up/Escape cleanup events.

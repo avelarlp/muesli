@@ -269,19 +269,19 @@ enum Nemotron35Language: String, CaseIterable, Codable, Sendable {
 
     var label: String {
         switch self {
-        case .auto: return "Auto-detect"
-        case .english: return "English"
+        case .auto: return "Detectar automaticamente"
+        case .english: return "Inglês"
         case .hindi: return "Hindi"
-        case .spanish: return "Spanish"
-        case .french: return "French"
-        case .german: return "German"
-        case .italian: return "Italian"
-        case .portuguese: return "Portuguese"
-        case .chinese: return "Chinese"
-        case .japanese: return "Japanese"
-        case .korean: return "Korean"
-        case .russian: return "Russian"
-        case .arabic: return "Arabic"
+        case .spanish: return "Espanhol"
+        case .french: return "Francês"
+        case .german: return "Alemão"
+        case .italian: return "Italiano"
+        case .portuguese: return "Português"
+        case .chinese: return "Chinês"
+        case .japanese: return "Japonês"
+        case .korean: return "Coreano"
+        case .russian: return "Russo"
+        case .arabic: return "Árabe"
         }
     }
 
@@ -315,9 +315,9 @@ enum MeetingLiveCaptionBackend: String, CaseIterable, Codable, Sendable {
 
     var settingsLabel: String {
         switch self {
-        case .parakeetRealtimeEOU: return "\(label) (live preview only)"
-        case .nemotron35: return "\(label) (live + final)"
-        case .whisperPortuguese: return "\(label) (live preview only)"
+        case .parakeetRealtimeEOU: return "\(label) (somente prévia ao vivo)"
+        case .nemotron35: return "\(label) (ao vivo + final)"
+        case .whisperPortuguese: return "\(label) (somente prévia ao vivo)"
         }
     }
 
@@ -862,7 +862,7 @@ struct HotkeyConfig: Codable, Equatable {
 
     // Key combination support (e.g. Cmd+Shift+R).
     // When set, the hotkey fires on keyDown with these modifiers held.
-    // When nil, the hotkey is a single modifier key (existing behavior).
+    // When nil, the hotkey is a single modifier key (legacy behavior).
     var combinationModifiers: UInt? = nil
     var combinationKeyCode: UInt16? = nil
 
@@ -946,7 +946,9 @@ struct HotkeyConfig: Codable, Equatable {
         return Self.supportedCombinationModifiers(from: NSEvent.ModifierFlags(rawValue: raw))
     }
 
-    static let `default` = HotkeyConfig()
+    /// A two-key shortcut is more reliable than a modifier-only `flagsChanged`
+    /// event across browsers and other macOS apps.
+    static let `default` = HotkeyConfig.combination(modifiers: [.control, .option], keyCode: 2)
     static let computerUseDefault = HotkeyConfig(keyCode: 54, label: "Right Cmd")
     static let meetingRecordingDefault = HotkeyConfig(
         keyCode: UInt16.max,
@@ -996,6 +998,10 @@ enum OnboardingUseCase: String, Codable, CaseIterable {
 
 struct AppConfig: Codable {
     var dictationHotkey: HotkeyConfig = .default
+    /// Marks migration away from the unreliable modifier-only default. Keeping
+    /// this lets someone deliberately choose Right Option later without it
+    /// being overwritten the next time the app starts.
+    var dictationCombinationHotkeyMigrationApplied: Bool = true
     var computerUseHotkey: HotkeyConfig = .computerUseDefault
     var enableComputerUseHotkey: Bool = false
     var meetingRecordingHotkey: HotkeyConfig = .meetingRecordingDefault
@@ -1115,6 +1121,7 @@ struct AppConfig: Codable {
 
     enum CodingKeys: String, CodingKey {
         case dictationHotkey = "dictation_hotkey"
+        case dictationCombinationHotkeyMigrationApplied = "dictation_combination_hotkey_migration_applied"
         case computerUseHotkey = "computer_use_hotkey"
         case enableComputerUseHotkey = "enable_computer_use_hotkey"
         case meetingRecordingHotkey = "meeting_recording_hotkey"
@@ -1233,7 +1240,16 @@ struct AppConfig: Codable {
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         let defaults = AppConfig()
-        dictationHotkey = (try? c.decode(HotkeyConfig.self, forKey: .dictationHotkey)) ?? defaults.dictationHotkey
+        let decodedDictationHotkey = (try? c.decode(HotkeyConfig.self, forKey: .dictationHotkey))
+            ?? defaults.dictationHotkey
+        let hasAppliedDictationCombinationMigration = c.contains(.dictationCombinationHotkeyMigrationApplied)
+        if !hasAppliedDictationCombinationMigration,
+           decodedDictationHotkey == HotkeyConfig(keyCode: 61, label: "Right Option") {
+            dictationHotkey = .default
+        } else {
+            dictationHotkey = decodedDictationHotkey
+        }
+        dictationCombinationHotkeyMigrationApplied = true
         computerUseHotkey = (try? c.decode(HotkeyConfig.self, forKey: .computerUseHotkey))
             ?? HotkeyConfig.computerUseDefault(avoiding: dictationHotkey)
         let hasAppliedComputerUseHotkeyDefaultMigration = c.contains(.computerUseHotkeyDefaultDisabledMigrationApplied)

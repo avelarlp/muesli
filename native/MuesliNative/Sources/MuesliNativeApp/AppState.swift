@@ -32,12 +32,12 @@ enum SettingsPane: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .general: return "General"
-        case .sync: return "Sync"
-        case .dictation: return "Dictation"
-        case .computerUse: return "Computer Use"
-        case .meetings: return "Meetings"
-        case .appearance: return "Appearance"
+        case .general: return "Geral"
+        case .sync: return "Sincronização"
+        case .dictation: return "Ditado"
+        case .computerUse: return "Uso do computador"
+        case .meetings: return "Reuniões"
+        case .appearance: return "Aparência"
         }
     }
 }
@@ -51,9 +51,9 @@ enum ModelsCategory: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .dictation: return "Dictation"
-        case .streaming: return "Streaming"
-        case .postProcessing: return "Post-processing"
+        case .dictation: return "Ditado"
+        case .streaming: return "Ao vivo"
+        case .postProcessing: return "Pós-processamento"
         }
     }
 }

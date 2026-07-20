@@ -41,11 +41,11 @@ struct ModelsView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: MuesliTheme.spacing24) {
-                    Text("Models")
+                    Text("Modelos")
                         .font(MuesliTheme.title1())
                         .foregroundStyle(MuesliTheme.textPrimary)
 
-                    Text("Download and manage models for dictation, streaming, and post-processing.")
+                    Text("Baixe e gerencie modelos para ditado, transcrição ao vivo e pós-processamento.")
                         .font(MuesliTheme.body())
                         .foregroundStyle(MuesliTheme.textSecondary)
 
@@ -82,51 +82,51 @@ struct ModelsView: View {
             syncSelectionsFromActiveBackend()
         }
         .alert(
-            "Delete \"\(modelToDelete?.label ?? "")\"?",
+            "Excluir \"\(modelToDelete?.label ?? "")\"?",
             isPresented: Binding(
                 get: { modelToDelete != nil },
                 set: { if !$0 { modelToDelete = nil } }
             )
         ) {
-            Button("Cancel", role: .cancel) {
+            Button("Cancelar", role: .cancel) {
                 modelToDelete = nil
             }
-            Button("Delete", role: .destructive) {
+            Button("Excluir", role: .destructive) {
                 guard let option = modelToDelete else { return }
                 deleteModel(option)
                 modelToDelete = nil
             }
         } message: {
-            Text("The downloaded model files will be removed from this Mac. You can download the model again later.")
+            Text("Os arquivos baixados do modelo serão removidos deste Mac. Você poderá baixá-lo novamente depois.")
         }
         .alert(
-            "Delete \"\(postProcModelToDelete?.label ?? "")\"?",
+            "Excluir \"\(postProcModelToDelete?.label ?? "")\"?",
             isPresented: Binding(
                 get: { postProcModelToDelete != nil },
                 set: { if !$0 { postProcModelToDelete = nil } }
             )
         ) {
-            Button("Cancel", role: .cancel) {
+            Button("Cancelar", role: .cancel) {
                 postProcModelToDelete = nil
             }
-            Button("Delete", role: .destructive) {
+            Button("Excluir", role: .destructive) {
                 guard let option = postProcModelToDelete else { return }
                 deletePostProcModel(option)
                 postProcModelToDelete = nil
             }
         } message: {
-            Text("The downloaded model files will be removed from this Mac. You can download the model again later.")
+            Text("Os arquivos baixados do modelo serão removidos deste Mac. Você poderá baixá-lo novamente depois.")
         }
         .alert(
-            "Delete \"\(MeetingLiveCaptionModelStore.label)\"?",
+            "Excluir \"\(MeetingLiveCaptionModelStore.label)\"?",
             isPresented: $showDeleteLiveCaptionModelConfirmation
         ) {
-            Button("Cancel", role: .cancel) {}
-            Button("Delete", role: .destructive) {
+            Button("Cancelar", role: .cancel) {}
+            Button("Excluir", role: .destructive) {
                 deleteLiveCaptionModel()
             }
         } message: {
-            Text("Live meetings will fall back to committed VAD-chunk captions until this model is downloaded again.")
+            Text("As reuniões ao vivo voltarão a usar legendas por blocos de áudio até que este modelo seja baixado novamente.")
         }
     }
 
@@ -143,8 +143,8 @@ struct ModelsView: View {
         case .dictation:
             familyCard(
                 title: "Parakeet Family",
-                subtitle: "NVIDIA speech models for fast everyday dictation.",
-                defaultBadge: "Default: v3",
+                subtitle: "Modelos de fala da NVIDIA para ditado rápido no dia a dia.",
+                defaultBadge: "Padrão: v3",
                 logo: "nvidia-logo",
                 selection: $selectedParakeetModel,
                 options: BackendOption.parakeetFamily
@@ -152,8 +152,8 @@ struct ModelsView: View {
 
             familyCard(
                 title: "Whisper",
-                subtitle: "OpenAI Whisper variants. Runs on Apple Neural Engine via CoreML.",
-                defaultBadge: "Default: Small",
+                subtitle: "Variações do Whisper da OpenAI. Roda no Apple Neural Engine via CoreML.",
+                defaultBadge: "Padrão: Small",
                 logo: "openai-logo",
                 selection: $selectedWhisperModel,
                 options: BackendOption.whisperFamily
@@ -173,7 +173,7 @@ struct ModelsView: View {
     private var comingSoonSection: some View {
         if !BackendOption.comingSoon.isEmpty {
             VStack(alignment: .leading, spacing: MuesliTheme.spacing8) {
-                Text("COMING SOON")
+                Text("EM BREVE")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(MuesliTheme.textTertiary)
                     .textCase(.uppercase)
@@ -215,11 +215,11 @@ struct ModelsView: View {
     private var streamingSection: some View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing12) {
             VStack(alignment: .leading, spacing: MuesliTheme.spacing4) {
-                Text("STREAMING")
+                Text("TRANSCRIÇÃO AO VIVO")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(MuesliTheme.textTertiary)
 
-                Text("Choose one live meeting transcript model. Nemotron is live + final; Parakeet is live preview only.")
+                Text("Escolha um modelo para a transcrição ao vivo das reuniões. Nemotron é ao vivo + final; Whisper PT-BR mostra uma prévia ao vivo.")
                     .font(MuesliTheme.caption())
                     .foregroundStyle(MuesliTheme.textSecondary)
             }
@@ -268,7 +268,7 @@ struct ModelsView: View {
                             .foregroundStyle(MuesliTheme.textTertiary)
                     }
 
-                    Text("Low-latency English preview while a meeting is in progress. A separate meeting model creates the final transcript.")
+                    Text("Prévia em inglês de baixa latência durante a reunião. Um modelo separado gera a transcrição final.")
                         .font(MuesliTheme.caption())
                         .foregroundStyle(MuesliTheme.textSecondary)
                 }
@@ -276,7 +276,7 @@ struct ModelsView: View {
                 Spacer()
 
                 if isActive {
-                    Text("Active")
+                    Text("Ativo")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(MuesliTheme.success)
                         .padding(.horizontal, 8)
@@ -284,7 +284,7 @@ struct ModelsView: View {
                         .background(MuesliTheme.success.opacity(0.15))
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                 } else if isLiveCaptionModelDownloaded {
-                    Text("Ready")
+                    Text("Pronto")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(MuesliTheme.textTertiary)
                         .padding(.horizontal, 8)
@@ -298,7 +298,7 @@ struct ModelsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     ProgressView(value: liveCaptionDownloadProgress)
                         .tint(MuesliTheme.accent)
-                    Text("\(Int(liveCaptionDownloadProgress * 100))% downloading...")
+                    Text("\(Int(liveCaptionDownloadProgress * 100))% baixado...")
                         .font(.system(size: 11))
                         .foregroundStyle(MuesliTheme.textTertiary)
                 }
@@ -306,7 +306,7 @@ struct ModelsView: View {
 
             HStack(spacing: MuesliTheme.spacing8) {
                 if isDownloadingLiveCaptionModel {
-                    Button("Cancel") {
+                    Button("Cancelar") {
                         liveCaptionDownloadTask?.cancel()
                         liveCaptionDownloadTask = nil
                         isDownloadingLiveCaptionModel = false
@@ -317,7 +317,7 @@ struct ModelsView: View {
                     .foregroundStyle(MuesliTheme.textSecondary)
                 } else if isLiveCaptionModelDownloaded {
                     if !isActive {
-                        Button("Set Active") {
+                        Button("Ativar") {
                             controller.updateConfig {
                                 $0.meetingLiveCaptionBackend = MeetingLiveCaptionBackend.parakeetRealtimeEOU.rawValue
                                 $0.enableLiveStreamingPartials = true
@@ -341,9 +341,9 @@ struct ModelsView: View {
                             .frame(width: 20, height: 20)
                     }
                     .buttonStyle(.plain)
-                    .help("Delete live caption model")
+                    .help("Excluir modelo de legenda ao vivo")
                 } else {
-                    Button("Download") {
+                    Button("Baixar") {
                         startLiveCaptionModelDownload()
                     }
                     .buttonStyle(.plain)
@@ -418,7 +418,7 @@ struct ModelsView: View {
                                 .foregroundStyle(MuesliTheme.textSecondary)
                         }
 
-                        Text("SenseVoice, Qwen, Indic ASR, and Gemma 4 evaluation backends. Hidden by default because these are still slower and less polished.")
+                        Text("Backends em avaliação: SenseVoice, Qwen, Indic ASR e Gemma 4. Ficam ocultos por padrão porque ainda são mais lentos e menos estáveis.")
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(MuesliTheme.textPrimary)
                             .opacity(0.8)
@@ -446,8 +446,8 @@ struct ModelsView: View {
                             modelCard(
                                 option: option,
                                 logo: logoForBackend(option),
-                                downloadedLabel: "Used for Cleanup",
-                                activationDisabledReason: "Unavailable while Gemma 4 is selected for cleanup. Choose another cleanup backend first."
+                                downloadedLabel: "Usado na limpeza",
+                                activationDisabledReason: "Indisponível enquanto o Gemma 4 estiver selecionado para limpeza. Escolha antes outro backend de limpeza."
                             )
                         } else {
                             modelCard(option: option, logo: logoForBackend(option))
@@ -492,13 +492,13 @@ struct ModelsView: View {
     private var postProcessorSection: some View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing12) {
             VStack(alignment: .leading, spacing: MuesliTheme.spacing4) {
-                Text("POST-PROCESSING")
+                Text("PÓS-PROCESSAMENTO")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(MuesliTheme.textTertiary)
                     .textCase(.uppercase)
                     .padding(.leading, 2)
 
-                Text("Optional LLM cleanup layer applied after transcription. Removes filler words, formats spoken lists, and corrects common dictation errors.")
+                Text("Camada opcional de limpeza por IA aplicada após a transcrição. Remove vícios de linguagem, formata listas faladas e corrige erros comuns de ditado.")
                     .font(.system(size: 12, weight: .medium))
                     .foregroundStyle(MuesliTheme.textSecondary)
                     .padding(.leading, 2)
@@ -528,13 +528,13 @@ struct ModelsView: View {
             onSetActive: {
                 controller.selectPostProcessorBackend(.gemma4LiteRT)
             },
-            description: "On-device Gemma cleanup for filler removal, formatting, and transcript correction. Shares one download with the experimental Gemma dictation backend.",
-            activeLabel: "Cleanup Active",
-            downloadedLabel: isCompatible ? "Downloaded" : "Used for Dictation",
-            actionTitle: "Use for Cleanup",
+            description: "Limpeza local com Gemma para remover vícios de linguagem, formatar e corrigir a transcrição. Compartilha o download com o backend experimental de ditado Gemma.",
+            activeLabel: "Limpeza ativa",
+            downloadedLabel: isCompatible ? "Baixado" : "Usado no ditado",
+            actionTitle: "Usar na limpeza",
             activationDisabledReason: isCompatible
                 ? nil
-                : "Unavailable while Gemma 4 is selected for dictation. Choose another dictation model first."
+                : "Indisponível enquanto o Gemma 4 estiver selecionado para ditado. Escolha antes outro modelo de ditado."
         )
     }
 
@@ -566,7 +566,7 @@ struct ModelsView: View {
                 Spacer()
 
                 if isActive {
-                    Text("Active")
+                    Text("Ativo")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(MuesliTheme.success)
                         .padding(.horizontal, 8)
@@ -574,7 +574,7 @@ struct ModelsView: View {
                         .background(MuesliTheme.success.opacity(0.15))
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                 } else if isDownloaded {
-                    Text("Downloaded")
+                    Text("Baixado")
                         .font(.system(size: 11, weight: .medium))
                         .foregroundStyle(MuesliTheme.textTertiary)
                         .padding(.horizontal, 8)
@@ -588,7 +588,7 @@ struct ModelsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     ProgressView(value: progress)
                         .tint(MuesliTheme.accent)
-                    Text("\(Int(progress * 100))% downloading...")
+                    Text("\(Int(progress * 100))% baixado...")
                         .font(.system(size: 11))
                         .foregroundStyle(MuesliTheme.textTertiary)
                 }
@@ -596,7 +596,7 @@ struct ModelsView: View {
 
             HStack(spacing: MuesliTheme.spacing8) {
                 if isDownloading {
-                    Button("Cancel") {
+                    Button("Cancelar") {
                         cancelPostProcDownload(option)
                     }
                     .buttonStyle(.plain)
@@ -608,7 +608,7 @@ struct ModelsView: View {
                     .clipShape(RoundedRectangle(cornerRadius: MuesliTheme.cornerSmall))
                 } else if isDownloaded {
                     if !isActive {
-                        Button("Set Active") {
+                        Button("Ativar") {
                             controller.selectPostProcessor(option)
                         }
                         .buttonStyle(.plain)
@@ -630,7 +630,7 @@ struct ModelsView: View {
                     }
                     .buttonStyle(.plain)
                 } else {
-                    Button("Download") {
+                    Button("Baixar") {
                         startPostProcDownload(option)
                     }
                     .buttonStyle(.plain)
@@ -695,7 +695,7 @@ struct ModelsView: View {
             }
 
             HStack(alignment: .center, spacing: MuesliTheme.spacing12) {
-                Text("Variant")
+                Text("Variante")
                     .font(MuesliTheme.caption())
                     .foregroundStyle(MuesliTheme.textTertiary)
                     .frame(width: 52, alignment: .leading)
@@ -722,7 +722,7 @@ struct ModelsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     ProgressView(value: progress)
                         .tint(MuesliTheme.accent)
-                    Text("\(Int(progress * 100))% downloading...")
+                    Text("\(Int(progress * 100))% baixado...")
                         .font(.system(size: 11))
                         .foregroundStyle(MuesliTheme.textTertiary)
                 }
@@ -742,7 +742,7 @@ struct ModelsView: View {
     @ViewBuilder
     private func familyStatusBadge(isActive: Bool, isDownloaded: Bool) -> some View {
         if isActive {
-            Text("Active")
+            Text("Ativo")
                 .font(.system(size: 11, weight: .semibold))
                 .foregroundStyle(MuesliTheme.success)
                 .padding(.horizontal, 8)
@@ -750,7 +750,7 @@ struct ModelsView: View {
                 .background(MuesliTheme.success.opacity(0.15))
                 .clipShape(RoundedRectangle(cornerRadius: 4))
         } else if isDownloaded {
-            Text("Downloaded")
+            Text("Baixado")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(MuesliTheme.textTertiary)
                 .padding(.horizontal, 8)
@@ -795,13 +795,13 @@ struct ModelsView: View {
         isActive: Bool,
         isDownloaded: Bool,
         isDownloading: Bool,
-        actionTitle: String = "Set Active",
+        actionTitle: String = "Ativar",
         activationDisabledReason: String? = nil,
         onSetActive: (() -> Void)? = nil
     ) -> some View {
         HStack(spacing: MuesliTheme.spacing8) {
             if isDownloading {
-                Button("Cancel") {
+                Button("Cancelar") {
                     cancelDownload(option)
                 }
                 .buttonStyle(.plain)
@@ -841,7 +841,7 @@ struct ModelsView: View {
                 }
                 .buttonStyle(.plain)
             } else {
-                Button("Download") {
+                Button("Baixar") {
                     startDownload(option)
                 }
                 .buttonStyle(.plain)
@@ -863,7 +863,7 @@ struct ModelsView: View {
         description: String? = nil,
         activeLabel: String = "Active",
         downloadedLabel: String = "Downloaded",
-        actionTitle: String = "Set Active",
+        actionTitle: String = "Ativar",
         activationDisabledReason: String? = nil
     ) -> some View {
         let isActive = activeOverride ?? (appState.selectedBackend == option)
@@ -881,7 +881,7 @@ struct ModelsView: View {
                             .foregroundStyle(MuesliTheme.textPrimary)
 
                         if option.recommended {
-                            Text("Recommended")
+                    Text("Recomendado")
                                 .font(.system(size: 10, weight: .semibold))
                                 .foregroundStyle(.white)
                                 .padding(.horizontal, 6)
@@ -924,7 +924,7 @@ struct ModelsView: View {
 
             if option.backend == BackendOption.cohereTranscribe.backend {
                 HStack(alignment: .center, spacing: MuesliTheme.spacing12) {
-                    Text("Language")
+                    Text("Idioma")
                         .font(MuesliTheme.caption())
                         .foregroundStyle(MuesliTheme.textTertiary)
                         .frame(width: 64, alignment: .leading)
@@ -942,7 +942,7 @@ struct ModelsView: View {
 
             if option.backend == BackendOption.indicASR.backend {
                 HStack(alignment: .center, spacing: MuesliTheme.spacing12) {
-                    Text("Language")
+                    Text("Idioma")
                         .font(MuesliTheme.caption())
                         .foregroundStyle(MuesliTheme.textTertiary)
                         .frame(width: 64, alignment: .leading)
@@ -960,7 +960,7 @@ struct ModelsView: View {
 
             if option.backend == BackendOption.nemotron35Multilingual.backend {
                 HStack(alignment: .center, spacing: MuesliTheme.spacing12) {
-                    Text("Language")
+                    Text("Idioma")
                         .font(MuesliTheme.caption())
                         .foregroundStyle(MuesliTheme.textTertiary)
                         .frame(width: 64, alignment: .leading)
@@ -980,10 +980,10 @@ struct ModelsView: View {
                         Image(systemName: "arrow.triangle.2.circlepath")
                             .font(.system(size: 11))
                             .foregroundStyle(MuesliTheme.accent)
-                        Text("A newer model build is available.")
+                        Text("Uma versão mais nova do modelo está disponível.")
                             .font(MuesliTheme.caption())
                             .foregroundStyle(MuesliTheme.textSecondary)
-                        Button("Update") { updateNemotron35(option) }
+                        Button("Atualizar") { updateNemotron35(option) }
                             .buttonStyle(.plain)
                             .font(.system(size: 12, weight: .medium))
                             .foregroundStyle(MuesliTheme.accent)
@@ -996,7 +996,7 @@ struct ModelsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     ProgressView(value: progress)
                         .tint(MuesliTheme.accent)
-                    Text("\(Int(progress * 100))% downloading...")
+                    Text("\(Int(progress * 100))% baixado...")
                         .font(.system(size: 11))
                         .foregroundStyle(MuesliTheme.textTertiary)
                 }

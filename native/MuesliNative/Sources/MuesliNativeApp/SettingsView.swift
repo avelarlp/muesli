@@ -26,27 +26,27 @@ struct SettingsView: View {
         var title: String {
             switch self {
             case .dictations:
-                return "Clear dictation history?"
+                return "Limpar histórico de ditados?"
             case .meetings:
-                return "Clear meeting history?"
+                return "Limpar histórico de reuniões?"
             }
         }
 
         var message: String {
             switch self {
             case .dictations:
-                return "This will permanently remove all saved dictations. This cannot be undone."
+                return "Isso removerá permanentemente todos os ditados salvos. Esta ação não pode ser desfeita."
             case .meetings:
-                return "This will permanently remove all saved meetings, notes, transcripts, and retained audio recordings. This cannot be undone."
+                return "Isso removerá permanentemente todas as reuniões, notas, transcrições e gravações de áudio armazenadas. Esta ação não pode ser desfeita."
             }
         }
 
         var confirmLabel: String {
             switch self {
             case .dictations:
-                return "Clear Dictations"
+                return "Limpar ditados"
             case .meetings:
-                return "Clear Meetings"
+                return "Limpar reuniões"
             }
         }
     }
@@ -139,15 +139,15 @@ struct SettingsView: View {
         let selected = appState.config.resolvedMeetingLiveCaptionBackend
         guard appState.config.enableLiveStreamingPartials,
               downloadedMeetingLiveCaptionBackends.contains(selected) else {
-            return "Live captions are off. Select a streaming model to preview speech as it is spoken."
+            return "As legendas ao vivo estão desativadas. Escolha um modelo para visualizar a fala enquanto ela é dita."
         }
         if usesUnifiedMeetingTranscript {
-            return "Nemotron transcribes continuously and becomes the final raw transcript."
+            return "O Nemotron transcreve continuamente e se torna a transcrição bruta final."
         }
         if selected == .whisperPortuguese {
-            return "Whisper Large Turbo previews Portuguese as it is spoken; the final model transcribes separately."
+            return "O Whisper Large Turbo mostra uma prévia em português enquanto a fala acontece; o modelo final transcreve separadamente."
         }
-        return "Parakeet provides a low-latency preview; the final model transcribes separately."
+        return "O Parakeet oferece uma prévia de baixa latência; o modelo final transcreve separadamente."
     }
 
     private var selectedMeetingBackendLabel: String {
@@ -207,20 +207,20 @@ struct SettingsView: View {
     }
 
     private var dictationMicrophoneOptions: [DictationMicrophoneOption] {
-        var options = [DictationMicrophoneOption(uid: nil, label: "Automatic")]
+        var options = [DictationMicrophoneOption(uid: nil, label: "Automático")]
         options += dictationInputDevices.map { device in
             DictationMicrophoneOption(uid: device.uid, label: device.name)
         }
         if let selectedUID = appState.config.dictationInputDeviceUID,
            !options.contains(where: { $0.uid == selectedUID }) {
-            options.append(DictationMicrophoneOption(uid: selectedUID, label: "Selected microphone unavailable"))
+            options.append(DictationMicrophoneOption(uid: selectedUID, label: "Microfone selecionado indisponível"))
         }
         return options
     }
 
     private var selectedDictationMicrophoneLabel: String {
         let selectedUID = appState.config.dictationInputDeviceUID
-        return dictationMicrophoneOptions.first(where: { $0.uid == selectedUID })?.label ?? "Automatic"
+        return dictationMicrophoneOptions.first(where: { $0.uid == selectedUID })?.label ?? "Automático"
     }
 
     private var activeFeatureTourTarget: FeatureTourTarget? {
@@ -231,7 +231,7 @@ struct SettingsView: View {
         ScrollViewReader { scrollProxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: MuesliTheme.spacing24) {
-                    Text("Settings")
+                    Text("Ajustes")
                         .font(MuesliTheme.title1())
                         .foregroundStyle(MuesliTheme.textPrimary)
 
@@ -289,16 +289,16 @@ struct SettingsView: View {
                 }
             }
             .alert(
-                pendingDataDestruction?.title ?? "Confirm Destructive Action",
+                pendingDataDestruction?.title ?? "Confirmar ação destrutiva",
                 isPresented: Binding(
                     get: { pendingDataDestruction != nil },
                     set: { if !$0 { pendingDataDestruction = nil } }
                 )
             ) {
-                Button("Cancel", role: .cancel) {
+                Button("Cancelar", role: .cancel) {
                     pendingDataDestruction = nil
                 }
-                Button(pendingDataDestruction?.confirmLabel ?? "Delete", role: .destructive) {
+                Button(pendingDataDestruction?.confirmLabel ?? "Excluir", role: .destructive) {
                     switch pendingDataDestruction {
                     case .dictations:
                         controller.clearDictationHistory()
@@ -313,17 +313,17 @@ struct SettingsView: View {
                 Text(pendingDataDestruction?.message ?? "")
             }
             .alert(
-                "Enable Accessibility?",
+                "Ativar Acessibilidade?",
                 isPresented: $isShowingDictionaryAccessibilityPrompt
             ) {
-                Button("Cancel", role: .cancel) {
+                Button("Cancelar", role: .cancel) {
                     controller.cancelDictionaryCorrectionAccessibilityEnableRequest()
                 }
-                Button("Enable") {
+                Button("Ativar") {
                     controller.requestDictionaryCorrectionAccessibilityEnable()
                 }
             } message: {
-                Text("Dictionary suggestions briefly read focused app text via Accessibility after dictation. Grant access, then relaunch Muesli to turn suggestions on.")
+                Text("As sugestões do dicionário leem brevemente o texto do app em foco via Acessibilidade após o ditado. Conceda acesso e reinicie o Muesli para ativá-las.")
             }
             .sheet(isPresented: $isCleanupPromptManagerPresented) {
                 TranscriptCleanupPromptsManagerView(
@@ -376,25 +376,25 @@ struct SettingsView: View {
 
     private func screenContextDescription(includesScreenOCR: Bool) -> String {
         if !accessibilityGranted {
-            return "Grant Accessibility, then toggle again if needed."
+            return "Conceda acesso à Acessibilidade e, se necessário, ative novamente."
         }
         if includesScreenOCR, !screenRecordingGranted {
-            return "Adds nearby app text for post-processing. Screen Recording enables OCR context."
+            return "Adiciona o texto próximo do app ao pós-processamento. A Gravação de Tela habilita o contexto por OCR."
         }
         if includesScreenOCR {
-            return "Adds nearby app text and OCR context."
+            return "Adiciona o texto próximo do app e o contexto por OCR."
         }
-        return "Adds nearby app text for post-processing."
+        return "Adiciona o texto próximo do app ao pós-processamento."
     }
 
     private var dictationOCRContextDescription: String {
         if !appState.config.enableScreenContext {
-            return "Turn on App context first."
+            return "Ative primeiro o contexto do app."
         }
         if !screenRecordingGranted {
-            return "Grant Screen Recording to add frontmost-window OCR text."
+            return "Conceda Gravação de Tela para adicionar o texto por OCR da janela em primeiro plano."
         }
-        return "Adds frontmost-window OCR text. Cloud cleanup may send this text to the selected provider."
+        return "Adiciona o texto por OCR da janela em primeiro plano. A limpeza na nuvem pode enviar esse texto ao provedor selecionado."
     }
 
     @ViewBuilder
@@ -432,7 +432,7 @@ struct SettingsView: View {
         let width = controlWidth
         HStack(alignment: .top, spacing: 20) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Screen OCR context")
+                Text("Contexto por OCR da tela")
                     .font(MuesliTheme.body())
                     .foregroundStyle(MuesliTheme.textPrimary)
                 Text(dictationOCRContextDescription)
@@ -490,9 +490,9 @@ struct SettingsView: View {
 
     private var generalSettingsPane: some View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing24) {
-            settingsSection("General") {
+            settingsSection("Geral") {
                 VStack(alignment: .leading, spacing: MuesliTheme.spacing8) {
-                    settingsRow("Launch at login") {
+                    settingsRow("Abrir ao iniciar sessão") {
                         settingsSwitch(isOn: appState.config.launchAtLogin) { newValue in
                             controller.setLaunchAtLogin(newValue)
                         }
@@ -502,7 +502,7 @@ struct SettingsView: View {
                     }
                 }
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("Open dashboard on launch") {
+                settingsRow("Abrir painel ao iniciar") {
                     settingsSwitch(isOn: appState.config.openDashboardOnLaunch) { newValue in
                         controller.updateConfig { $0.openDashboardOnLaunch = newValue }
                     }
@@ -511,16 +511,16 @@ struct SettingsView: View {
 
             permissionsSection
 
-            settingsSection("Data") {
+            settingsSection("Dados") {
                 HStack(spacing: MuesliTheme.spacing12) {
-                    actionButton("Clear dictation history", role: .destructive) {
+                    actionButton("Limpar histórico de ditados", role: .destructive) {
                         pendingDataDestruction = .dictations
                     }
-                    actionButton("Clear meeting history", role: .destructive) {
+                    actionButton("Limpar histórico de reuniões", role: .destructive) {
                         pendingDataDestruction = .meetings
                     }
                     .disabled(controller.isMeetingRecording())
-                    .help("Stop the current meeting recording before clearing meeting history.")
+                    .help("Pare a gravação da reunião atual antes de limpar o histórico de reuniões.")
                 }
             }
         }
@@ -531,7 +531,7 @@ struct SettingsView: View {
             Image(systemName: "exclamationmark.circle.fill")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundStyle(MuesliTheme.recording)
-            Text("Requires approval in System Settings")
+            Text("Requer aprovação nos Ajustes do Sistema")
                 .font(MuesliTheme.caption())
                 .foregroundStyle(MuesliTheme.textTertiary)
             Spacer(minLength: MuesliTheme.spacing12)
@@ -541,7 +541,7 @@ struct SettingsView: View {
                 HStack(spacing: 6) {
                     Image(systemName: "arrow.up.forward.square")
                         .font(.system(size: 11, weight: .semibold))
-                    Text("Open")
+                    Text("Abrir")
                 }
             }
             .buttonStyle(.plain)
@@ -551,7 +551,7 @@ struct SettingsView: View {
             .padding(.vertical, 4)
             .background(MuesliTheme.accentSubtle)
             .clipShape(RoundedRectangle(cornerRadius: MuesliTheme.cornerSmall))
-            .help("Open Login Items in System Settings")
+            .help("Abrir Itens de Início nos Ajustes do Sistema")
         }
         .padding(.leading, MuesliTheme.spacing16)
         .padding(.trailing, MuesliTheme.spacing16)
@@ -662,8 +662,8 @@ struct SettingsView: View {
     }
 
     private var dictationModelSettingsSection: some View {
-        settingsSection("Speech Recognition") {
-            settingsRow("Dictation model", controlWidth: meetingControlWidth) {
+        settingsSection("Reconhecimento de fala") {
+            settingsRow("Modelo de ditado", controlWidth: meetingControlWidth) {
                 settingsMenu(
                     selection: appState.selectedBackend.label,
                     options: dictationBackendOptions.map(\.label),
@@ -675,11 +675,11 @@ struct SettingsView: View {
                 }
             }
             if !disabledDictationBackendLabels.isEmpty {
-                settingsDescription("Gemma 4 dictation is unavailable while Gemma 4 is the cleanup backend.")
+                settingsDescription("O ditado com Gemma 4 fica indisponível quando o Gemma 4 é o backend de limpeza.")
             }
             if appState.selectedBackend.backend == BackendOption.cohereTranscribe.backend {
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("Cohere language", controlWidth: meetingControlWidth) {
+                settingsRow("Idioma do Cohere", controlWidth: meetingControlWidth) {
                     cohereLanguageMenu
                 }
             }
@@ -1154,10 +1154,10 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing24) {
             dictationModelSettingsSection
 
-            settingsSection("Transcription") {
+            settingsSection("Transcrição") {
                 settingsRow(
-                    "Microphone",
-                    description: "Automatic uses system input, or Mac mic with AirPods."
+                    "Microfone",
+                    description: "Automático usa a entrada do sistema ou o microfone do Mac com AirPods."
                 ) {
                     let options = dictationMicrophoneOptions
                     FixedWidthPopUp(
@@ -1172,7 +1172,7 @@ struct SettingsView: View {
                     .frame(height: 24)
                 }
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("AI transcript cleanup") {
+                settingsRow("Limpeza da transcrição por IA") {
                     settingsSwitch(isOn: appState.config.enablePostProcessor) { newValue in
                         controller.setPostProcessorEnabled(newValue)
                     }
@@ -1181,32 +1181,32 @@ struct SettingsView: View {
                 cleanupPromptSettings
                 Divider().background(MuesliTheme.surfaceBorder)
                 settingsRow(
-                    "Dictionary suggestions",
-                    description: "Suggest words after corrections by briefly reading focused app text via Accessibility."
+                    "Sugestões do dicionário",
+                    description: "Sugere palavras após correções lendo brevemente o texto do app em foco via Acessibilidade."
                 ) {
                     settingsSwitch(isOn: appState.config.enableDictionaryCorrectionPrompts) { newValue in
                         handleDictionaryCorrectionPromptsToggle(newValue)
                     }
-                    .help("Briefly reads focused app text after dictation to detect corrections.")
+                    .help("Lê brevemente o texto do app em foco após o ditado para detectar correções.")
                 }
             }
 
             dictationCleanupSettingsSection
 
-            settingsSection("Advanced") {
-                settingsRow("Pause media during dictation") {
+            settingsSection("Avançado") {
+                settingsRow("Pausar mídia durante o ditado") {
                     settingsSwitch(isOn: appState.config.pauseMediaDuringDictation) { newValue in
                         controller.updateConfig { $0.pauseMediaDuringDictation = newValue }
                     }
                 }
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("Mute system audio during dictation") {
+                settingsRow("Silenciar áudio do sistema durante o ditado") {
                     settingsSwitch(isOn: appState.config.muteSystemAudioDuringDictation) { newValue in
                         controller.updateConfig { $0.muteSystemAudioDuringDictation = newValue }
                     }
                 }
                 Divider().background(MuesliTheme.surfaceBorder)
-                screenContextRow("App context")
+                screenContextRow("Contexto do app")
                 Divider().background(MuesliTheme.surfaceBorder)
                 dictationOCRContextRow
             }
@@ -1215,25 +1215,25 @@ struct SettingsView: View {
 
     private var computerUseSettingsPane: some View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing24) {
-            settingsSection("Computer Use") {
-                settingsRow("Enable planner", controlWidth: meetingControlWidth) {
+            settingsSection("Uso do computador") {
+                settingsRow("Ativar planejador", controlWidth: meetingControlWidth) {
                     settingsSwitch(isOn: appState.config.enableComputerUsePlanner) { newValue in
                         controller.updateConfig { $0.enableComputerUsePlanner = newValue }
                     }
                 }
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("Account", controlWidth: meetingControlWidth) {
+                settingsRow("Conta", controlWidth: meetingControlWidth) {
                     chatGPTAccountControl()
                 }
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("Planner model", controlWidth: meetingControlWidth) {
+                settingsRow("Modelo do planejador", controlWidth: meetingControlWidth) {
                     settingsModelMenu(
                         currentModel: appState.config.computerUsePlannerModel,
                         presets: SummaryModelPreset.computerUsePlannerModels
                     ) { val in controller.updateConfig { $0.computerUsePlannerModel = val } }
                 }
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("Timeout", controlWidth: meetingControlWidth) {
+                settingsRow("Tempo limite", controlWidth: meetingControlWidth) {
                     Stepper(
                         value: Binding(
                             get: { max(appState.config.computerUseTimeoutSeconds, 1) },
@@ -1244,7 +1244,7 @@ struct SettingsView: View {
                         in: 1...600,
                         step: 15
                     ) {
-                        Text("\(max(appState.config.computerUseTimeoutSeconds, 1)) seconds")
+                        Text("\(max(appState.config.computerUseTimeoutSeconds, 1)) segundos")
                             .font(MuesliTheme.body())
                             .foregroundStyle(MuesliTheme.textPrimary)
                     }
@@ -1257,20 +1257,20 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: MuesliTheme.spacing24) {
             meetingTranscriptionSettingsSection
 
-            settingsSection("Meeting Context") {
-                screenContextRow("Meeting context", includesScreenOCR: true)
+            settingsSection("Contexto da reunião") {
+                screenContextRow("Contexto da reunião", includesScreenOCR: true)
             }
 
             meetingSummarySettingsSection
 
-            settingsSection("Meeting Notes") {
-                settingsRow("Default template", controlWidth: meetingControlWidth) {
+            settingsSection("Notas da reunião") {
+                settingsRow("Modelo padrão", controlWidth: meetingControlWidth) {
                     meetingTemplateMenu(selectionID: appState.config.defaultMeetingTemplateID) { id in
                         controller.updateDefaultMeetingTemplate(id: id)
                     }
                 }
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("Summary retries", controlWidth: meetingControlWidth) {
+                settingsRow("Tentativas de resumo", controlWidth: meetingControlWidth) {
                     Stepper(
                         value: Binding(
                             get: {
@@ -1289,23 +1289,23 @@ struct SettingsView: View {
                             .foregroundStyle(MuesliTheme.textPrimary)
                     }
                 }
-                settingsDescription("Retry transient AI summary failures before saving failed notes.")
+                settingsDescription("Tenta novamente falhas temporárias do resumo por IA antes de salvar notas com falha.")
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("Templates", controlWidth: meetingControlWidth) {
-                    actionButton("Manage Templates…") {
+                settingsRow("Modelos", controlWidth: meetingControlWidth) {
+                    actionButton("Gerenciar modelos…") {
                         controller.showMeetingTemplatesManager()
                     }
                 }
             }
 
-            settingsSection("Recording") {
-                settingsRow("Auto-record calendar meetings") {
+            settingsSection("Gravação") {
+                settingsRow("Gravar reuniões do calendário automaticamente") {
                     settingsSwitch(isOn: appState.config.autoRecordMeetings) { newValue in
                         controller.updateConfig { $0.autoRecordMeetings = newValue }
                     }
                 }
                 Divider().background(MuesliTheme.surfaceBorder)
-                settingsRow("Save meeting recording") {
+                settingsRow("Salvar gravação da reunião") {
                     settingsMenu(
                         selection: recordingSaveLabel(for: appState.config.meetingRecordingSavePolicy),
                         options: MeetingRecordingSavePolicy.allCases.map(recordingSaveLabel(for:))
@@ -1316,7 +1316,7 @@ struct SettingsView: View {
                 }
                 if appState.config.meetingRecordingSavePolicy != .never {
                     Divider().background(MuesliTheme.surfaceBorder)
-                    settingsRow("Recording format") {
+                    settingsRow("Formato da gravação") {
                         settingsMenu(
                             selection: appState.config.resolvedMeetingRecordingFileFormat.displayName,
                             options: MeetingRecordingFileFormat.allCases.map(recordingFileFormatLabel(for:))
@@ -1325,7 +1325,7 @@ struct SettingsView: View {
                             controller.updateConfig { $0.meetingRecordingFileFormat = format.rawValue }
                         }
                     }
-                    settingsDescription("M4A is recommended for smaller files. WAV is lossless and uses more storage.")
+                    settingsDescription("M4A é recomendado para arquivos menores. WAV é sem perdas e usa mais armazenamento.")
                 }
             }
 

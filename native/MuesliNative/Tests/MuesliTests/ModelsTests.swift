@@ -603,6 +603,7 @@ struct AppConfigTests {
         #expect(config.resolvedMeetingLiveCaptionBackend == .whisperPortuguese)
         #expect(config.showMeetingTranscriptOnIndicatorHover == true)
         #expect(config.dictationHotkey == .default)
+        #expect(config.dictationCombinationHotkeyMigrationApplied == true)
         #expect(config.computerUseHotkey == .computerUseDefault)
         #expect(config.enableComputerUseHotkey == false)
         #expect(config.computerUseHotkeyDefaultDisabledMigrationApplied == true)
@@ -1307,6 +1308,40 @@ struct AppConfigTests {
         #expect(config.enableComputerUseHotkey == false)
     }
 
+    @Test("legacy Right Option dictation shortcut migrates to Control Option D")
+    func legacyDictationHotkeyMigratesToCombination() throws {
+        let json = """
+        {
+          "dictation_hotkey": {
+            "keyCode": 61,
+            "label": "Right Option"
+          }
+        }
+        """
+
+        let config = try JSONDecoder().decode(AppConfig.self, from: Data(json.utf8))
+
+        #expect(config.dictationHotkey == .default)
+        #expect(config.dictationCombinationHotkeyMigrationApplied == true)
+    }
+
+    @Test("explicit Right Option shortcut is preserved after migration")
+    func explicitLegacyStyleDictationHotkeyIsPreserved() throws {
+        let json = """
+        {
+          "dictation_hotkey": {
+            "keyCode": 61,
+            "label": "Right Option"
+          },
+          "dictation_combination_hotkey_migration_applied": true
+        }
+        """
+
+        let config = try JSONDecoder().decode(AppConfig.self, from: Data(json.utf8))
+
+        #expect(config.dictationHotkey == HotkeyConfig(keyCode: 61, label: "Right Option"))
+    }
+
     @Test("legacy computer use hotkey enabled config is disabled once")
     func legacyComputerUseHotkeyEnabledConfigIsDisabledOnce() throws {
         let json = """
@@ -1835,9 +1870,9 @@ struct HotkeyMonitorTests {
         #expect(cancelCount == 1)
     }
 
-    @Test("combination shortcut requires hold threshold before toggling")
+    @Test("combination shortcut toggles immediately")
     @MainActor
-    func combinationShortcutRequiresHoldThresholdBeforeToggling() {
+    func combinationShortcutTogglesImmediately() {
         let scheduler = ManualHotkeyScheduler()
         let monitor = scheduler.makeMonitor(startDelay: 0.05)
         monitor.configure(HotkeyConfig.combination(modifiers: [.command, .shift], keyCode: 15))
@@ -1847,26 +1882,6 @@ struct HotkeyMonitorTests {
         }
 
         monitor.handleCombinationForTests(type: .keyDown, keyCode: 15, flags: [.command, .shift])
-        scheduler.advance(by: 0.02)
-        monitor.handleCombinationForTests(type: .keyUp, keyCode: 15, flags: [.command, .shift])
-        scheduler.advance(by: 0.05)
-
-        #expect(toggleStartCount == 0)
-    }
-
-    @Test("combination shortcut toggles after hold threshold")
-    @MainActor
-    func combinationShortcutTogglesAfterHoldThreshold() {
-        let scheduler = ManualHotkeyScheduler()
-        let monitor = scheduler.makeMonitor(startDelay: 0.03)
-        monitor.configure(HotkeyConfig.combination(modifiers: [.command, .shift], keyCode: 15))
-        var toggleStartCount = 0
-        monitor.onToggleStart = {
-            toggleStartCount += 1
-        }
-
-        monitor.handleCombinationForTests(type: .keyDown, keyCode: 15, flags: [.command, .shift])
-        scheduler.advance(by: 0.05)
 
         #expect(toggleStartCount == 1)
     }
@@ -1887,7 +1902,6 @@ struct HotkeyMonitorTests {
         }
 
         monitor.handleCombinationForTests(type: .keyDown, keyCode: 15, flags: [.command, .shift])
-        scheduler.advance(by: 0.05)
         #expect(monitor.isToggleRecording)
 
         monitor.cancelToggleMode()
@@ -1897,9 +1911,9 @@ struct HotkeyMonitorTests {
         #expect(toggleStopCount == 0)
     }
 
-    @Test("combination shortcut cancels when modifiers release before threshold")
+    @Test("combination shortcut remains active after key release")
     @MainActor
-    func combinationShortcutCancelsWhenModifiersReleaseBeforeThreshold() {
+    func combinationShortcutRemainsActiveAfterKeyRelease() {
         let scheduler = ManualHotkeyScheduler()
         let monitor = scheduler.makeMonitor(startDelay: 0.05)
         monitor.configure(HotkeyConfig.combination(modifiers: [.command, .shift], keyCode: 15))
@@ -1909,11 +1923,9 @@ struct HotkeyMonitorTests {
         }
 
         monitor.handleCombinationForTests(type: .keyDown, keyCode: 15, flags: [.command, .shift])
-        scheduler.advance(by: 0.02)
         monitor.handleCombinationForTests(type: .flagsChanged, keyCode: 56, flags: .command)
-        scheduler.advance(by: 0.05)
 
-        #expect(toggleStartCount == 0)
+        #expect(toggleStartCount == 1)
     }
 }
 
@@ -2073,11 +2085,11 @@ struct WordCountTests {
 @Suite("HotkeyConfig")
 struct HotkeyConfigTests {
 
-    @Test("default is Right Option")
+    @Test("default is Control Option D")
     func defaultConfig() {
         let config = HotkeyConfig.default
-        #expect(config.keyCode == 61)
-        #expect(config.label == "Right Option")
+        #expect(config.isCombination)
+        #expect(config.label == "⌃⌥D")
     }
 
     @Test("computer use default is Right Cmd")
@@ -2210,7 +2222,7 @@ struct HotkeyConfigTests {
 
     @Test("display label uses keyboard symbols")
     func displayLabelUsesKeyboardSymbols() {
-        #expect(HotkeyConfig.default.displayLabel == "Right ⌥")
+        #expect(HotkeyConfig.default.displayLabel == "⌃⌥D")
         #expect(HotkeyConfig.computerUseDefault.displayLabel == "Right ⌘")
         #expect(HotkeyConfig.meetingRecordingDefault.displayLabel == "⌘⇧R")
         #expect(HotkeyConfig(keyCode: 62, label: "Right Ctrl").displayLabel == "Right ⌃")
